@@ -16,8 +16,10 @@ module SPMidi
 			d = DataCollection.new
 			x = 24
 			assert_equal(x-24,d.down_octave(x,2))
-			# how to I use assert_raise
-			# i.e how do I use exceptions
+			y = 64
+			assert_equal(y,d.down_octave(x,0))
+			z = 72
+			assert_equal(z+24,d.down_octave(z,-2))
 		end
 
 	end
