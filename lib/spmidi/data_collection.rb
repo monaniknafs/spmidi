@@ -4,7 +4,7 @@ require 'set'
 
 module SPMidi
 	class DataCollection
-		def down_octave(note, x=1)
+		def down_octave(note, x=1) 
 			# default is to move down one octave as name suggests
 			new_note = note - x*12
 			if new_note.between?(0,127)
@@ -23,33 +23,72 @@ module SPMidi
 		end
 
 		def note_octave(note)
+			# octaves start from 0 up to 10
+			# by MIDI note constraints
 			if note.between?(0,127)
 				return note / 12
 			end
 		end
 
-		def randomise(note_ts_array)
-			max = 10 # cap for random number range
-			last_ts = 0
-			note_ts_array.each do |note_ts|
-				note_ts[:timestamp] = note_ts[:timestamp]*Random::rand(max)/max
-				note_ts[:relative_ts] = note_ts[:timestamp] - last_ts
-				last_ts = note_ts[:relative_ts]
-			end
-			# now note_ts_array is no longer ordered by timestamp
-			return note_ts_array
+		def round_to_frac(ts, element)
+			# min_time_element in milliseconds
+			r = ts % element
+			rounded_ts = ts - r + (r >= element / 2.0 ? element : 0)
+			return rounded_ts
 		end
 
 		def lock_to_structure(note_ts_array, min_time_element)
 			# min_time_element in milliseconds
 			last_ts = 0
+			structured_array = Array.new
+
 			note_ts_array.each do |note_ts|
-				# TODO: round up and down, this is quite hacky and wrong
-				note_ts[:timestamp] = note_ts[:timestamp] - (note_ts[:timestamp] % min_time_element)
-				note_ts[:relative_ts] = note_ts[:relative_ts] - (note_ts[:relative_ts] % min_time_element)
-				last_ts = note_ts[:relative_ts]
+				# collect values from hash
+				d = note_ts[:note]
+				ts = note_ts[:timestamp]
+				rts = note_ts[:rel_ts]
+
+				# round to nearest min_time_element multiple
+				ts = round_to_frac(ts, min_time_element)
+				
+				# add structured array entry
+				structured_array << {:note => d,
+					 				:timestamp => ts, 
+					 				:rel_ts => ts - last_ts}
+
+				# update new last timestamp (n-1th timestamp)
+				last_ts = ts
 			end
-		end # mutating buffer, not good TODO
+			return structured_array
+		end
+
+		def organise_print_buffer(data_ts_array)
+			# takes hash array, each element is {:data => , :timestamp => }
+			# returns hash array, each element is {:note => , :ts => , :rel_ts => }
+			# also prints each element of hash array
+			buff = Array.new
+
+			if !data_ts_array.empty?
+				start_ts = data_ts_array[0][:timestamp]
+				last_ts = 0
+			end
+
+			data_ts_array.each do |data_ts|
+				if data_ts[:data][0] == 144
+					note = data_ts[:data]
+					ts = data_ts[:timestamp] - start_ts
+					rel_ts = ts - last_ts
+					buff << {:note => note, 
+							:ts => ts, 
+							:rel_ts => rel_ts}
+					last_ts = ts
+					puts "sleep #{buff.last[:rel_ts]/1000}"
+					puts "play #{buff.last[:note][1]}"
+				end
+			end
+
+			return buff
+		end
 
 		def runtime()
 			# KORG nanoKEY2 produces notes from C_octave5 down to C_octave3
@@ -62,60 +101,39 @@ module SPMidi
 			input.open do |input|
 				puts "give me some notes!"
 				record = false
-				# applicable only if record is true
-				start_ts = 0 # marks beginning of recording
-				last_ts = 0 # most recent note's timestamp
 
+			# blocks until input comes in
 			while m = input.gets[0]
-					note = m[:data] # an array [status, pitch, velocity]
-					ts = m[:timestamp] # milliseconds after input.open
+					note = m[:data] # an array [status, pitch, velocity]			
 
-					if record
-					# set record value
-					# use sustain button for recording
+				 	# initialise recording if applicable
+					if note == [176,64,127]
+						start = input.buffer.length
+						record = true
+						puts "started recording"
+					end
+
+					if record 
 						if note == [176,64,0]
+							finish = input.buffer.length
 							record = false
 							puts "stopped recording"
-							if (!buff.empty?)
-								puts "recorded data:"
-								lock_to_structure(buff, 1/8.0)
-								buff.each do |b|
-									puts "sleep #{b[:relative_ts]/1000}"
-									puts "play #{b[:data][1]}"
-								end
-								# puts randomise(buff)
-								# puts lock_to_structure(buff, 1/16)
-							end
-						end
-
-						# core action
-					 	if note[0] == 144
-					 		buff << {:data => note,
-					 				:timestamp => ts - start_ts, 
-					 				:relative_ts => ts - last_ts}
-					 		last_ts = ts
-							puts note_letter(note[1])
+							recorded_data = input.buffer.slice(start-1,finish-2)
+							organise_print_buffer(recorded_data)
 						end
 					else
 					 	# not recording
-					 	# initialise buffer if applicable
-						if note == [176,64,127]
-							buff = Array.new
-							start_ts = ts # marks beginning of recording
-							last_ts = ts # most recent note's timestamp
-							record = true
-							puts "started recording"
-						end
-
-						# core action
-					 	# only print the on-notes
+					 	# print notes, only the on-notes
 					 	if note[0] == 144
 					 		# only print the pitch-value
 					 		puts note_letter(note[1])
 					 	end
+
 					end
 				end
 			end
 		end
+		d = DataCollection.new
+		d.runtime()
 	end
 end
