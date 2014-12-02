@@ -4,38 +4,6 @@ require 'set'
 
 module SPMidi
 	class DataCollection
-		def down_octave(note, x=1) 
-			# default is to move down one octave as name suggests
-			new_note = note - x*12
-			if new_note.between?(0,127)
-				return new_note
-			else
-				puts "can't move that far, check down_octave method inputs"
-				return note
-			end
-		end
-
-		def note_letter(note)
-			note_array = [:C,:Cs,:D,:Ds,:E,:F,:Fs,:G,:Gs,:A,:As,:B]
-			note_name =  note_array[note % 12]
-			note_with_octave = "#{note_name}#{note_octave(note)}"
-			return note_with_octave
-		end
-
-		def note_octave(note)
-			# octaves start from 0 up to 10
-			# by MIDI note constraints
-			if note.between?(0,127)
-				return note / 12
-			end
-		end
-
-		def round_to_frac(ts, element)
-			# min_time_element in milliseconds
-			r = ts % element
-			rounded_ts = ts - r + (r >= element / 2.0 ? element : 0)
-			return rounded_ts
-		end
 
 		def lock_to_structure(note_ts_array, min_time_element)
 			# min_time_element in milliseconds
