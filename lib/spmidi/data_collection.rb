@@ -30,8 +30,10 @@ module SPMidi
 					data = m[:data]
 
 					fresh_ts = ts - start_ts
-					note = Note.new(data, fresh_ts, fresh_ts - prev_ts, buff, index)
-          prev_ts = ts	
+
+					note = Note.new(data, fresh_ts, ts - prev_ts, buff, index)
+          prev_ts = ts
+
 					index += 1
 
 					if record
@@ -39,17 +41,17 @@ module SPMidi
 							record = false
 							start_ts = 0
 							puts "stopped recording"
-							# print record buffer maybe, if i don't want to do it inline?
-							# TODO : make note print method, and array print method
 						else
 							record_buffer << note
+              if note.data[0] == 144
+                note.spprint
+              end
 						end
 					else
 					 	# not recording
 					 	# print only the on-notes
 					 	if note.data[0] == 144
-					 		# only print the pitch-value
-					 		puts note.note_letter
+              note.spprint
 					 	end
 					end
 
@@ -59,7 +61,6 @@ module SPMidi
 						start_ts = ts
 						puts "started recording"
 					end
-
 				end
 			end
 		end
