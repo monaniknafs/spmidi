@@ -1,107 +1,71 @@
 #!/usr/local/bin/ruby
 require 'unimidi'
 require 'set'
+require_relative 'note'
 
 module SPMidi
 	class DataCollection
-
-		def lock_to_structure(note_ts_array, min_time_element)
-			# min_time_element in milliseconds
-			last_ts = 0
-			structured_array = Array.new
-
-			note_ts_array.each do |note_ts|
-				# collect values from hash
-				d = note_ts[:note]
-				ts = note_ts[:timestamp]
-				rts = note_ts[:rel_ts]
-
-				# round to nearest min_time_element multiple
-				ts = round_to_frac(ts, min_time_element)
-				
-				# add structured array entry
-				structured_array << {:note => d,
-					 				:timestamp => ts, 
-					 				:rel_ts => ts - last_ts}
-
-				# update new last timestamp (n-1th timestamp)
-				last_ts = ts
-			end
-			return structured_array
-		end
-
-		def organise_print_buffer(data_ts_array)
-			# takes hash array, each element is {:data => , :timestamp => }
-			# returns hash array, each element is {:note => , :ts => , :rel_ts => }
-			# also prints each element of hash array
-			buff = Array.new
-
-			if !data_ts_array.empty?
-				start_ts = data_ts_array[0][:timestamp]
-				last_ts = 0
-			end
-
-			data_ts_array.each do |data_ts|
-				if data_ts[:data][0] == 144
-					note = data_ts[:data]
-					ts = data_ts[:timestamp] - start_ts
-					rel_ts = ts - last_ts
-					buff << {:note => note, 
-							:ts => ts, 
-							:rel_ts => rel_ts}
-					last_ts = ts
-					puts "sleep #{buff.last[:rel_ts]/1000}"
-					puts "play #{buff.last[:note][1]}"
-				end
-			end
-
-			return buff
-		end
-
 		def runtime()
 			# KORG nanoKEY2 produces notes from C_octave5 down to C_octave3
 			# assuming MIDI keyboard is last input
 			input = UniMIDI::Input.last
 			input.clear_buffer
-			buff = Array.new
+
+			# buff = Array.new
+			prev_ts = 0 # use for relative timestamp
+			start_ts = 0 # use to identify start of recording
 
 			# runtime behaviour
 			input.open do |input|
 				puts "give me some notes!"
 				record = false
 
-			# blocks until input comes in
-			while m = input.gets[0]
-					note = m[:data] # an array [status, pitch, velocity]			
+				# blocks until input comes in
+				while m = input.gets[0]
+					buff = input.buffer
+					record_buffer = Array.new
+					index = 0
 
-				 	# initialise recording if applicable
-					if note == [176,64,127]
-						start = input.buffer.length
-						record = true
-						puts "started recording"
-					end
+					ts = m[:timestamp]
+					data = m[:data]
 
-					if record 
-						if note == [176,64,0]
-							finish = input.buffer.length
+					fresh_ts = ts - start_ts
+					note = Note.new(data, fresh_ts, fresh_ts - prev_ts, buff, index)
+          prev_ts = ts	
+					index += 1
+
+					if record
+						if note.data == [176,64,0]
 							record = false
+							start_ts = 0
 							puts "stopped recording"
-							recorded_data = input.buffer.slice(start-1,finish-2)
-							organise_print_buffer(recorded_data)
+							# print record buffer maybe, if i don't want to do it inline?
+							# TODO : make note print method, and array print method
+						else
+							record_buffer << note
 						end
 					else
 					 	# not recording
-					 	# print notes, only the on-notes
-					 	if note[0] == 144
+					 	# print only the on-notes
+					 	if note.data[0] == 144
 					 		# only print the pitch-value
-					 		puts note_letter(note[1])
+					 		puts note.note_letter
 					 	end
-
 					end
+
+				 	# initialise recording if applicable
+					if note.data == [176,64,127] # on-value as specified by keyboard
+						record = true
+						start_ts = ts
+						puts "started recording"
+					end
+
 				end
 			end
 		end
+
 		d = DataCollection.new
 		d.runtime()
 	end
 end
+# TODO: work out how to properly clear buffer, so on/off button actually works
