@@ -53,7 +53,7 @@ module SPMidi
 					 	if note.data[0] == 144
               note.spprint
 					 	end
-					end
+          end
 
 				 	# initialise recording if applicable
 					if note.data == [176,64,127] # on-value as specified by keyboard
