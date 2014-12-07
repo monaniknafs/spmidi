@@ -22,7 +22,6 @@ module SPMidi
       puts "play #{@data[1]}"
     end
 
-		# design decision: make methods immutable
 		def down_octave(x=1) 
 			# default is to move down one octave as name suggests
 			old_note = @data[1]
@@ -51,7 +50,6 @@ module SPMidi
 			return @data[1] / 12
 		end
 
-		# TODO: consistently change this method's name, and parameters
 		def lock_to_structure(rel_ts_or_ts, element)
 			# min_time_element in milliseconds
 			timestamp = (rel_ts_or_ts == "rel_ts" ? @rel_ts : @ts)
