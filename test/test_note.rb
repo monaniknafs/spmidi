@@ -3,7 +3,6 @@ require_relative '../lib/spmidi/note'
 
 module SPMidi
 	class TestNote < Test::Unit::TestCase
-
 		def test_note
 			n0 = Note.new([0,0,10],0.0,0.0,[],0)
 			assert_equal("C0",n0.note_letter)

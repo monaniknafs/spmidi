@@ -1,5 +1,4 @@
 #!/usr/local/bin/ruby
-require 'unimidi'
 require 'set'
 
 module SPMidi
@@ -18,7 +17,7 @@ module SPMidi
       # prints pitch and relative timestamp
       # following sonic pi style
       # TODO: what units does sonic pi use between notes?
-      puts "sleep #{@rel_ts/1000}"
+      puts "sleep #{@rel_ts/750}"
       puts "play #{@data[1]}"
     end
 
