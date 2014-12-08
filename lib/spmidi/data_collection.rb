@@ -1,6 +1,6 @@
 #!/usr/local/bin/ruby
 require 'unimidi'
-require 'set'
+
 require_relative 'note'
 
 module SPMidi
@@ -19,19 +19,17 @@ module SPMidi
 			input.open do |input|
 				puts "give me some notes!"
 				record = false
+				buff = input.buffer
 
 				# blocks until input comes in
 				while m = input.gets[0]
-					buff = input.buffer
 					record_buffer = Array.new
 					index = 0
 
 					ts = m[:timestamp]
 					data = m[:data]
 
-					fresh_ts = ts - start_ts
-
-					note = Note.new(data, fresh_ts, ts - prev_ts, buff, index)
+					note = Note.new(data, ts - start_ts, ts - prev_ts, buff, index)
           prev_ts = ts
 
 					index += 1
@@ -39,11 +37,14 @@ module SPMidi
 					if record
 						if note.data == [176,64,0]
 							record = false
-							start_ts = 0
+							start_ts = ts
 							puts "stopped recording"
+							puts record_buffer.size
+							record_buffer.each {|x| puts x.spprint}
 						else
-							record_buffer << note
               if note.data[0] == 144
+								record_buffer << note
+								puts "pushed"
                 note.spprint
               end
 						end
