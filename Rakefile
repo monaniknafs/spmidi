@@ -1,6 +1,13 @@
 require 'rake'
 require 'rake/testtask'
+require_relative  'test/test_note'
 
-task :default => :rake
+task :test_note do
+	tn = TestNote.new
+	tn.test_note
+end
 
-Rake::TestTask.new
+task :default => :test_note
+
+Rake::TestTask.new 
+
