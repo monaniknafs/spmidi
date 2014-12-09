@@ -20,11 +20,11 @@ module SPMidi
 				puts "give me some notes!"
 				record = false
 				buff = input.buffer
+        record_buffer = []
+        index = 0
 
 				# blocks until input comes in
 				while m = input.gets[0]
-					record_buffer = Array.new
-					index = 0
 
 					ts = m[:timestamp]
 					data = m[:data]
@@ -39,29 +39,29 @@ module SPMidi
 							record = false
 							start_ts = ts
 							puts "stopped recording"
-							puts record_buffer.size
-							record_buffer.each {|x| puts x.spprint}
+							record_buffer.each {|x| x.sp_letter_print}
 						else
-              if note.data[0] == 144
+		          if note.data[0] == 144
+                note.lock_rel_ts(1/8.0)
 								record_buffer << note
-								puts "pushed"
-                note.spprint
-              end
+		          end
 						end
 					else
 					 	# not recording
 					 	# print only the on-notes
 					 	if note.data[0] == 144
-              note.spprint
+              note.sp_ambi_print
 					 	end
           end
 
 				 	# initialise recording if applicable
 					if note.data == [176,64,127] # on-value as specified by keyboard
 						record = true
+            record_buffer = []
 						start_ts = ts
 						puts "started recording"
 					end
+
 				end
 			end
 		end
@@ -70,4 +70,3 @@ module SPMidi
 		d.runtime()
 	end
 end
-# TODO: work out how to properly clear buffer, so on/off button actually works

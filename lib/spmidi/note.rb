@@ -1,5 +1,6 @@
 #!/usr/local/bin/ruby
 require 'set'
+require_relative 'samples'
 
 module SPMidi
 	class Note
@@ -12,14 +13,6 @@ module SPMidi
 			@buff = buff # input buffer note was initially played into
 			@index = index # index into input buffer
 		end
-
-    def spprint()
-      # prints pitch and relative timestamp
-      # following sonic pi style
-      # TODO: what units does sonic pi use between notes?
-      puts "sleep #{@rel_ts/750}"
-      puts "play #{@data[1]}"
-    end
 
 		def down_octave(x=1) 
 			# default is to move down one octave as name suggests
@@ -56,5 +49,61 @@ module SPMidi
 			rounded_ts = timestamp - r + (r >= element / 2.0 ? element : 0)
 			return rounded_ts
 		end
+
+    def lock_rel_ts(element)
+      @rel_ts = lock_to_structure("rel_ts", element)
+    end
+
+    def lock_ts(element)
+      @ts = lock_to_structure("ts", element)
+    end
+
+    def sp_number_print()
+      puts "sleep #{@rel_ts/1000}"
+      puts "play :#{@data[1]}"
+    end
+
+    def sp_letter_print()
+      # TODO: what units does sonic pi use between notes?
+      puts "sleep #{@rel_ts/1000}"
+      puts "play :#{note_letter()}"
+    end
+
+    def sp_electric_print()
+      s = Sample.new
+      puts "sleep #{@rel_ts/1000}"
+      puts "sample :#{s.electric(@data[1])}"
+    end
+
+    def sp_ambi_print()
+      s = Sample.new
+      pitch = data[1]
+      reg_pitch = pitch - 48
+      puts "sleep #{@rel_ts/1000}"
+      if (reg_pitch).between?(0,9) 
+        puts "sample :#{s.ambi(reg_pitch)}"
+      end
+    end
+
+    def sp_ambi_print()
+      s = Sample.new
+      pitch = data[1]
+      reg_pitch = pitch - 48
+      puts "sleep #{@rel_ts/1000}"
+      if (reg_pitch).between?(0,7) 
+        puts "sample :#{s.bass(reg_pitch)}"
+      end
+    end
+
+    def sp_drum_print()
+      s = Sample.new
+      pitch = data[1]
+      reg_pitch = pitch - 48
+      puts "sleep #{@rel_ts/1000}"
+      if (reg_pitch).between?(0,17) 
+        puts "sample :#{s.drum(reg_pitch)}"
+      end
+    end
+
 	end
 end
