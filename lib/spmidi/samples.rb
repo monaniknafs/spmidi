@@ -1,5 +1,5 @@
 module SPMidi
-  class Sample
+  class Samples
 
     def electric(pitch)
       electric_array = 

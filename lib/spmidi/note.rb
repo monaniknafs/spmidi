@@ -70,37 +70,37 @@ module SPMidi
     end
 
     def sp_electric_print()
-      s = Sample.new
+      s = Samples.new
       puts "sleep #{@rel_ts/1000}"
       puts "sample :#{s.electric(@data[1])}"
     end
 
     def sp_ambi_print()
-      s = Sample.new
+      s = Samples.new
       pitch = data[1]
       reg_pitch = pitch - 48
-      puts "sleep #{@rel_ts/1000}"
       if (reg_pitch).between?(0,9) 
+        puts "sleep #{@rel_ts/1000}"
         puts "sample :#{s.ambi(reg_pitch)}"
       end
     end
 
     def sp_ambi_print()
-      s = Sample.new
+      s = Samples.new
       pitch = data[1]
       reg_pitch = pitch - 48
-      puts "sleep #{@rel_ts/1000}"
       if (reg_pitch).between?(0,7) 
+        puts "sleep #{@rel_ts/1000}"
         puts "sample :#{s.bass(reg_pitch)}"
       end
     end
 
     def sp_drum_print()
-      s = Sample.new
+      s = Samples.new
       pitch = data[1]
       reg_pitch = pitch - 48
-      puts "sleep #{@rel_ts/1000}"
       if (reg_pitch).between?(0,17) 
+        puts "sleep #{@rel_ts/1000}"
         puts "sample :#{s.drum(reg_pitch)}"
       end
     end
