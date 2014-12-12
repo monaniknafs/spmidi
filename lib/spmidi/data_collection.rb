@@ -19,9 +19,7 @@ module SPMidi
       input.open do |input|
         puts "give me some notes!"
         record = false
-        buff = input.buffer
         record_buffer = []
-        index = 0
 
         # blocks until input comes in
         while m = input.gets[0]
@@ -29,10 +27,8 @@ module SPMidi
           ts = m[:timestamp]
           data = m[:data]
 
-          note = Note.new(data, ts - start_ts, ts - prev_ts, buff, index)
+          note = Note.new(data, ts - start_ts, ts - prev_ts)
           prev_ts = ts
-
-          index += 1
 
           if record
             if note.data == [176,64,0]

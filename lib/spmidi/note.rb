@@ -6,12 +6,10 @@ module SPMidi
   class Note
     attr_accessor :data, :ts, :rel_ts, :buff, :index
 
-    def initialize(data, ts, rel_ts, buff, index)
+    def initialize(data, ts, rel_ts)
       @data = data # an array [status, pitch, velocity]
       @ts = ts # timestamp relative to input connection
       @rel_ts = rel_ts # timestamp relative to prev note played
-      @buff = buff # input buffer note was initially played into
-      @index = index # index into input buffer
     end
 
     def down_octave(x=1) 
@@ -104,6 +102,5 @@ module SPMidi
         puts "sample :#{s.drum(reg_pitch)}"
       end
     end
-
   end
 end
