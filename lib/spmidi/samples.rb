@@ -1,6 +1,5 @@
 module SPMidi
   class Samples
-
     def electric(pitch)
       electric_array = 
         [:elec_triangle,
