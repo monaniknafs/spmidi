@@ -1,12 +1,13 @@
-
 module SPMidi
   class Pattern
     attr_accessor :notes, :length, :confidence
 
+    # TODO: not good design practice to have ts field in notes where it doesn't apply
+    # TODO: perhaps make a pattern element? which has an adjustable threshhold field in it etc? 
     def initialize(notes = [])
       @notes = notes # array containing notes in pattern in order of occurrence
       @length = notes.length # length of note array
-      @confidence = 1 # the number of times the pattern has been seen
+      @confidence = 0 # the number of times the pattern has been seen
     end
 
     def add(note)
@@ -18,6 +19,13 @@ module SPMidi
       @confidence += 1
     end
 
+    def print()
+      notes.each do |note|
+        p note.data
+        puts note.rel_ts
+      end
+    end
+
     def first_occurrence(note)
       # if note is in notes, returns index of first occurrence
       # else returns nil
@@ -26,7 +34,7 @@ module SPMidi
       #       by definition no two notes are the same
       index = 0
       @notes.each do |n|
-        if n.data[1] == note.data[1] #TODO make a method for checking PITCH is equal WITHIN REASON
+        if n.data == note.data #TODO make a method for checking PITCH is equal WITHIN REASON
           if n.rel_ts == note.rel_ts #TODO likewise for checking TIMESTAMPS are equal WITHIN REASON
             return index
           end
