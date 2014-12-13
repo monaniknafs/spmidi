@@ -57,11 +57,9 @@ module SPMidi
             start_ts = ts
             puts "started recording"
           end
-
         end
       end
     end
-
     d = DataCollection.new
     d.runtime()
   end
