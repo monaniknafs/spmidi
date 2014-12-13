@@ -1,5 +1,4 @@
 #!/usr/local/bin/ruby
-require 'set'
 require_relative 'samples'
 
 module SPMidi
