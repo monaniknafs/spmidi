@@ -26,23 +26,22 @@ module SPMidi
       end
     end
 
-    def first_occurrence(note)
+    def occurs?(note, index)
       # if note is in notes, returns index of first occurrence
       # else returns nil
       # TODO: make this work with confidence interval
       #       as it won't work as it stands
       #       by definition no two notes are the same
-      index = 0
-      @notes.each do |n|
-        if n.data == note.data #TODO make a method for checking PITCH is equal WITHIN REASON
-          if n.rel_ts == note.rel_ts #TODO likewise for checking TIMESTAMPS are equal WITHIN REASON
-            return index
-          end
-        end
-        index += 1
+      if index > @length-1
+        return nil
       end
-      return nil
-      # return notes.index(note)
+      if @notes[index].data == note.data #TODO make a method for checking PITCH is equal WITHIN REASON
+        if @notes[index].rel_ts == note.rel_ts #TODO likewise for checking TIMESTAMPS are equal WITHIN REASON
+          return true
+        end
+      end
+
+      return false
     end
   end
 end
