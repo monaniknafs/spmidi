@@ -10,49 +10,59 @@ module SPMidi
       @index = 1 #TODO: remove me once module is working
     end
 
+    def inc_placeholder()
+      if @current.confidence == 0
+        @placeholder += 1
+      else
+        @placeholder += 1
+        @placeholder = @placeholder % @current.notes.length
+      end
+    end
+
     def find_pattern_size(note)
-      # TODO use confidence field in pattern to determine whether this method needs to run or not
-      #      but should be ran on every note, to account for new notes being added  
       puts "pass number #{@index}"
-      puts "note: #{p note.data}"
+      puts "note: #{note.data}"
       puts "placeholder: #{placeholder}"
 
       if @current.confidence == 0 # have not yet confirmed a pattern  
-        occurs = @current.occurs?(note, 0) # this may equal nil  
-        if occurs
+        occurs_index = @current.occurs_after?(note, 0) # this may equal nil  
+        if occurs_index != nil
+          #@current.notes = @current.notes[occurs_index..@current.length-1]
           @current.confirm
           puts "confirmed" #TODO remove
         else
           @current.add(note)
         end
       else # have already confirmed a pattern
-        # TODO make simpler logic here
-        # TODO appropriately update placeholder
-        @placeholder = @placeholder % @current.length
-        occurs = @current.occurs?(note, @placeholder) # this may equal nil
-        if occurs
+        occurs_index = @current.occurs_after?(note, @placeholder) # this may equal nil
+        if occurs_index == @placeholder
           puts "yep, that follows the pattern" #TODO remove
           if @placeholder+1 == @current.length
             @current.confirm
           end
-
         else 
-          puts "doesn't follow the pattern"
-          # either first is nil or we have integer inequality
-          # but either way we are in the subsequence case
-          # (where greedy algorithms would otherwise fail)
-          revised = [] # revised pattern
-          current_notes = @current.notes
-          for i in 0..@current.confidence-1
-            revised.concat(current_notes)
+          if occurs_index != nil
+            puts "follows pattern, but a subset of"
+            @current.notes = @current.notes[placeholder..@current.length-1]
+            @current.length = @current.notes.length
+          else
+            puts "doesn't follow the pattern"
+            revised = [] # revised pattern
+            current_notes = @current.notes << @current.notes.last
+            for i in 0..@current.confidence-1
+              revised.concat(current_notes)
+            end
+            revised << note
+            # start fresh
+            @current = Pattern.new(revised)
+            @placeholder = @current.length - 1
           end
-          revised << note
-          # start fresh
-          @current = Pattern.new(revised)
         end
       end
-      @placeholder += 1
+      puts "current array:"
       current.print
+      puts ""
+      inc_placeholder()
       @index += 1
     end
   end

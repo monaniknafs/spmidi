@@ -40,8 +40,23 @@ module SPMidi
           return true
         end
       end
-
       return false
+    end
+
+    def occurs_after?(note,index)
+      # return true if note occurs from point index onwards
+      # nil returned if false or invalid
+      if index > @length-1
+        return nil
+      end
+      for i in index..@length-1
+        if @notes[i].data == note.data
+          if @notes[i].rel_ts == note.rel_ts
+            return i
+          end
+        end
+      end
+      return nil
     end
   end
 end
