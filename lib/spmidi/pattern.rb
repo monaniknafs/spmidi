@@ -15,12 +15,17 @@ module SPMidi
       @length += 1
     end
 
+    def trim_before(start)
+      @notes = @notes[start..@length-1]
+      @length = @notes.length
+    end
+    
     def confirm()
       @confidence += 1
     end
 
     def print()
-      notes.each do |note|
+      @notes.each do |note|
         p note.data
         puts note.rel_ts
       end
@@ -29,9 +34,6 @@ module SPMidi
     def occurs?(note, index)
       # if note is in notes, returns index of first occurrence
       # else returns nil
-      # TODO: make this work with confidence interval
-      #       as it won't work as it stands
-      #       by definition no two notes are the same
       if index > @length-1
         return nil
       end
@@ -44,7 +46,7 @@ module SPMidi
     end
 
     def occurs_after?(note,index)
-      # return true if note occurs from point index onwards
+      # return index of first occurrence if note occurs from point index onwards
       # nil returned if false or invalid
       if index > @length-1
         return nil

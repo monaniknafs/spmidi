@@ -21,64 +21,86 @@ module SPMidi
     end
 
     def test_cases
-    notes1 = [
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([1,2,3],0.7,0.3),
-    Note.new([1,2,4],0.5,0.3),
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([1,2,3],0.7,0.3),
-    Note.new([1,2,4],0.5,0.3),
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([1,2,3],0.7,0.3),
-    Note.new([1,2,4],0.5,0.3),
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([1,2,3],0.7,0.3),
-    Note.new([1,2,4],0.5,0.3)]
+      notes1 = [
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([1,2,3],0.7,0.3),
+      Note.new([1,2,4],0.5,0.3),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([1,2,3],0.7,0.3),
+      Note.new([1,2,4],0.5,0.3),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([1,2,3],0.7,0.3),
+      Note.new([1,2,4],0.5,0.3),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([1,2,3],0.7,0.3),
+      Note.new([1,2,4],0.5,0.3)]
 
-    p_notes1 = [
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([1,2,3],0.7,0.3),
-    Note.new([1,2,4],0.5,0.3)]
+      p_notes1 = [
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([1,2,3],0.7,0.3),
+      Note.new([1,2,4],0.5,0.3)]
 
-    test_find_pattern_size(notes1,p_notes1)
+      #test_find_pattern_size(notes1,p_notes1)
 
-    notes2 = [
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([1,2,4],0.5,0.3),
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([1,2,4],0.5,0.3),
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([1,2,4],0.5,0.3),
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([1,2,4],0.5,0.3)]
+      notes2 = [
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([1,2,4],0.5,0.3),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([1,2,4],0.5,0.3),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([1,2,4],0.5,0.3),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([1,2,4],0.5,0.3)]
 
-    p_notes2 = [
-    Note.new([2,3,4],0.0,0.0),
-    Note.new([4,5,6],0.1,0.1),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([5,2,4],0.5,0.3),
-    Note.new([1,2,4],0.5,0.3)]
+      p_notes2 = [
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([1,2,4],0.5,0.3)]
 
-    test_find_pattern_size(notes2,p_notes2)
+      test_find_pattern_size(notes2,p_notes2)
 
+      pi = PatternInference.new
+      pi.backlog = [
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([7,5,6],0.3,0.4),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([7,8,6],0.3,0.4),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([5,2,4],0.5,0.3),
+      Note.new([1,2,4],0.5,0.3)]
+      pi.matched = [
+      Note.new([2,3,4],0.0,0.0),
+      Note.new([4,5,6],0.1,0.1),
+      Note.new([5,2,4],0.5,0.3)]
+
+      #substring = pi.backlog_match?(pi.matched)
+
+      #assert_equal(pi.matched, substring)
     end
   end
 end

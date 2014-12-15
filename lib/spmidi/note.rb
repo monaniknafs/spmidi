@@ -11,6 +11,12 @@ module SPMidi
       @rel_ts = rel_ts # timestamp relative to prev note played
     end
 
+    def ==(note)
+      # ts is not tested
+      # ts is unique to note
+      self.data == note.data && self.rel_ts == note.rel_ts
+    end
+
     def down_octave(x=1) 
       # default is to move down one octave as name suggests
       old_note = @data[1]
