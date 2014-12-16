@@ -1,3 +1,4 @@
+# leave comments displaying functionality until after documented
 require_relative 'pattern'
 
 module SPMidi
