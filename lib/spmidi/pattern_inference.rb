@@ -21,17 +21,25 @@ module SPMidi
     end
 
     def restore()
-      if @matched != []
-        curr = @current.notes
-        puts "confidence is #{@current.confidence}"
-        (@matched).each {|x| p x.data} # remove
-        @current = Pattern.new(@matched)
-        @matched = @current.notes
-        @ph = @current.length-1
-      else
-        @current = Pattern.new(@backlog)
-        @ph = @current.length-1
-      end
+      # if @matched != []
+      #   puts "confidence is #{@current.confidence}"
+      (@matched).each {|x| p x.data} # remove
+      #   len = @current.length
+      #   new_notes = []
+      #   for i in 0..len-1
+      #     new_notes.concat(@matched)
+      #   end
+      #   new_notes << note
+      #   @current = Pattern.new(new_notes)
+      #   @matched = @current.notes
+      #   @ph = @current.length-1
+      # else
+      #   @current = Pattern.new(@backlog)
+      #   @ph = @current.length-1
+      # end
+      @current = Pattern.new(@backlog)
+      @ph = @current.length-1
+      @matched = []
     end
 
     def save(note)
@@ -45,19 +53,20 @@ module SPMidi
     def backlog_match?(notes)
       # naive string matching
       substring = []
-      start = 0
       mlen = notes.length
+      clen = @current.notes.length
       for i in 0..mlen-1
-        for j in start..@backlog.length-1
+        for j in 0..clen-1
           m = notes[i,mlen]
-          b = @backlog[j,mlen]
-          if m == b
-            substring = m
+          c = @current.notes[j,mlen]
+          if m == c
+            substring = @current.notes[j,clen].dup
+            @matched = notes
+            @ph = mlen-1
             return substring
           end
         end
       end
-      puts "substring: #{substring.each {|x| x.print}}"
       return substring
     end
 
@@ -73,9 +82,9 @@ module SPMidi
         occurs = @current.occurs_after?(note,0) # occurrence in pattern
         if occurs != nil
           @current.trim_before(occurs)
-          @current.confirm
           puts note.class
           match(note)
+          @current.confirm
           puts "confirmed"
         else
           @current.add(note)
@@ -89,14 +98,16 @@ module SPMidi
             @current.confirm
           end
         else
-          new_current = backlog_match?(@matched << note) 
           if occurs != nil
+            (@matched).each {|x| p x.data} # remove
+            new_current = backlog_match?(@matched.dup << note) 
             puts "follows pattern subset"
             (@backlog).each {|x| p x.data} # remove
             puts "" # remove
-            (@matched).each {|x| p x.data} # remove
-            @current = Pattern.new(new_current)
-            @matched = new_current
+            puts ""
+            @current = Pattern.new(new_current.dup)
+            # @matched = new_current.dup
+            @current.confirm()
             (@matched).each {|x| p x.data} # remove
           else
             puts "doesn't follow pattern"
