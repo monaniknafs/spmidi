@@ -19,7 +19,7 @@ module SPMidi
 
       notes2 = []
       p2 = Pattern.new(notes2)
-      assert_equal(nil,p2.occurs?(Note.new([1,2,3],0.7,0.3),2))
+      assert_equal(false,p2.occurs?(Note.new([1,2,3],0.7,0.3),2))
 
       notes3 = 
       [Note.new([2,3,4],0.0,0.0),
