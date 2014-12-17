@@ -22,22 +22,7 @@ module SPMidi
     end
 
     def restore()
-      # if @matched != []
-      #   puts "confidence is #{@current.confidence}"
-      (@matched).each {|x| p x.data} # remove
-      #   len = @current.length
-      #   new_notes = []
-      #   for i in 0..len-1
-      #     new_notes.concat(@matched)
-      #   end
-      #   new_notes << note
-      #   @current = Pattern.new(new_notes)
-      #   @matched = @current.notes
-      #   @ph = @current.length-1
-      # else
-      #   @current = Pattern.new(@backlog)
-      #   @ph = @current.length-1
-      # end
+      @matched.each {|x| p x.data} # remove
       @current = Pattern.new(@backlog)
       @ph = @current.length-1
       @matched = []
@@ -51,7 +36,7 @@ module SPMidi
       @matched << note
     end
 
-    def backlog_match?(notes)
+    def backlog_match(notes)
       # naive string matching
       substring = []
       mlen = notes.length
@@ -59,8 +44,11 @@ module SPMidi
       for i in 0..mlen-1
         for j in 0..clen-1
           m = notes[i,mlen]
+          mlen = m.length
           c = @current.notes[j,mlen]
           if m == c
+            puts "i-index for matched = #{i}" # remove
+            puts "j-index for matched = #{j}" # remove
             substring = @current.notes[j,clen].dup
             @matched = notes
             @ph = mlen-1
@@ -71,11 +59,10 @@ module SPMidi
       return substring
     end
 
-    #TODO change all occurrences of @placeholder to @ph
     def find_pattern_size(note)
-      puts "pass number #{@index}"
-      puts "note: #{note.data}"
-      puts "placeholder: #{ph}"
+      puts "pass number #{@index}" # remove
+      puts "note: #{note.data}" # remove
+      puts "placeholder: #{ph}" # remove
 
       save(note) # put note in backlog list
 
@@ -86,14 +73,14 @@ module SPMidi
           puts note.class
           match(note)
           @current.confirm
-          puts "confirmed"
+          puts "confirmed" # remove
         else
           @current.add(note)
         end
       else # have already confirmed pattern
         occurs = @current.occurs_after?(note, @ph)
         if occurs == @ph
-          puts "follows pattern"
+          puts "follows pattern" #remove
           match(note)
           if @ph+1 == @current.length
             @current.confirm
@@ -101,26 +88,30 @@ module SPMidi
         else
           if occurs != nil
             (@matched).each {|x| p x.data} # remove
-            new_current = backlog_match?(@matched.dup << note) 
-            puts "follows pattern subset"
+            new_current = backlog_match(@matched.dup << note) 
+            puts ""
+            (@matched.dup << note).each {|x| p x.data} # remove
+            puts "follows pattern subset" # remove
             (@backlog).each {|x| p x.data} # remove
             puts "" # remove
             puts ""
             @current = Pattern.new(new_current.dup)
-            # @matched = new_current.dup
             @current.confirm()
             (@matched).each {|x| p x.data} # remove
+            if @current.notes.length == 0
+              puts "empty current pattern"
+            end
           else
-            puts "doesn't follow pattern"
+            puts "doesn't follow pattern" # remove
             restore()
           end
         end
       end
-      puts "current array:"
-      @current.print
-      puts ""
+      puts "current array:" # remove
+      @current.print # remove
+      puts "" # remove
       inc_ph()
-      puts "current confidence: #{@current.confidence}"
+      puts "current confidence: #{@current.confidence}" # remove
     end
   end
 end
