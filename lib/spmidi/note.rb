@@ -4,7 +4,7 @@ require_relative 'samples'
 module SPMidi
   class Note
     attr_accessor :data, :ts, :rel_ts, :buff, :index
-
+    
     def initialize(data, ts, rel_ts)
       @data = data # an array [status, pitch, velocity]
       @ts = ts # timestamp relative to input connection
@@ -68,6 +68,7 @@ module SPMidi
 
     def sp_letter_print()
       # TODO: what units does sonic pi use between notes?
+      # answer: ts relative to beats per minute; fix once integrated
       puts "sleep #{@rel_ts/1000}"
       puts "play :#{note_letter()}"
     end
