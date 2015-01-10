@@ -89,18 +89,17 @@ module SPMidi
           if occurs != nil
             (@matched).each {|x| p x.data} # remove
             new_current = backlog_match(@matched.dup << note) 
-            puts ""
+            puts "" # remove
             (@matched.dup << note).each {|x| p x.data} # remove
             puts "follows pattern subset" # remove
             (@backlog).each {|x| p x.data} # remove
             puts "" # remove
-            puts ""
             @current = Pattern.new(new_current.dup)
             @current.confirm()
             (@matched).each {|x| p x.data} # remove
-            if @current.notes.length == 0
-              puts "empty current pattern"
-            end
+            if @current.notes.length == 0 #remove
+              puts "empty current pattern" #remove
+            end #remove
           else
             puts "doesn't follow pattern" # remove
             restore()
@@ -112,6 +111,6 @@ module SPMidi
       puts "" # remove
       inc_ph()
       puts "current confidence: #{@current.confidence}" # remove
-    end
-  end
-end
+    end # def find_pattern_size
+  end # class pattern_inference
+end # module SPMidi
