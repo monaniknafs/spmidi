@@ -2,18 +2,30 @@ module SPMidi
   class PatternElement
     attr_accessor :data, :rel_ts
 
-    def initialize(note)
-      @data = note.data
-      @rel_ts = note.rel_ts
+    def initialize(*args)
+      if args.size == 2
+        @data = args[0]
+        @rel_ts = args[1]
+      elsif args.size == 1
+        @data = args[0].data
+        @rel_ts = args[0].rel_ts
+      else
+        puts 'error: pattern element initialize takes 1 or 2 arguments'
+      end
     end
 
-    def initialize(data, rel_ts)
-      @data = data
-      @rel_ts = rel_ts
-    end
+    # def initialize(note)
+    #   @data = note.data
+    #   @rel_ts = note.rel_ts
+    # end
+
+    # def initialize(data, rel_ts)
+    #   @data = data
+    #   @rel_ts = rel_ts
+    # end
     
     def ==(element)
-      if element.data != @data
+      if element.data[1] != @data[1]
         return false
       end
       # rel tstamps are normally distributed
