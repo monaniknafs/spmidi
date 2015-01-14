@@ -1,21 +1,27 @@
+require_relative 'pattern_element'
+
 module SPMidi
   class Pattern
-    attr_accessor :notes, :length, :confidence
-
+    attr_accessor :elements, :length, :confidence
+    # test intialization with note for pattern element
     def initialize(notes = [])
-      @notes = notes # array containing notes in pattern in order of occurrence
-      @length = notes.length # length of note array
+      @elements = [] # contains elements in pattern in order of occurrence
+      notes.each do |note|
+        e = PatternElement.new(note)
+        @elements << e
+      end
+      @length = @elements.length # length of note array
       @confidence = 0 # the number of times the pattern has been seen
     end
 
     def add(note)
-      @notes << note
+      @elements << PatternElement.new(note)
       @length += 1
     end
 
     def trim_before(start)
-      @notes = @notes[start..@length-1]
-      @length = @notes.length
+      @elements = @elements[start..@length-1]
+      @length = @elements.length
     end
     
     def confirm()
@@ -23,38 +29,35 @@ module SPMidi
     end
 
     def print()
-      @notes.each do |note|
-        p note.data
-        puts note.rel_ts
+      @elements.each do |e|
+        p e.data
+        puts e.rel_ts
       end
     end
 
     def occurs?(note, index)
-      # if note is in @notes, return true
+      # if pattern_element(note) is in @elements
+        # return true
       # else returns false
-      # method isn't used at the mo
+      # method isn't used at the momento
       if index > @length-1
         return false
       end
-      if @notes[index].data == note.data #TODO make a method for checking PITCH is equal WITHIN REASON
-        if @notes[index].rel_ts == note.rel_ts #TODO likewise for checking TIMESTAMPS and RELATIVE TIMESTAMPS are equal WITHIN REASON
-          return true
-        end
-      end
-      return false
+      e = PatternElement.new(note)
+      return e == elements[index]
     end
 
-    def occurs_after?(note,index)
-      # return index of first occurrence if note occurs from point index onwards
+    def occurs_after?(note,index) 
+      # if note occurs from point index onwards
+        # return index of first occurrence
       # nil returned if false or invalid
       if index > @length-1
         return nil
       end
+      e = PatternElement.new(note)
       for i in index..@length-1
-        if @notes[i].data == note.data
-          if @notes[i].rel_ts == note.rel_ts
+        if @elements[i] == e
             return i
-          end
         end
       end
       return nil
