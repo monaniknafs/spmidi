@@ -27,6 +27,10 @@ module SPMidi
       p3 = Pattern.new(notes3)
       assert_equal(nil,p3.occurs_after?(Note.new([1,2,3],0.7,0.3),0))
       assert_equal(0,p3.occurs_after?(Note.new([2,3,4],0.0,0.0),0))
+
+      p2 = p1.dup
+      p2.confirm
+      assert_equal(p1,p2)
     end
   end
 end
