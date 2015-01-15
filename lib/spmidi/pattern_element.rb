@@ -13,16 +13,6 @@ module SPMidi
         puts 'error: pattern element initialize takes 1 or 2 arguments'
       end
     end
-
-    # def initialize(note)
-    #   @data = note.data
-    #   @rel_ts = note.rel_ts
-    # end
-
-    # def initialize(data, rel_ts)
-    #   @data = data
-    #   @rel_ts = rel_ts
-    # end
     
     def ==(element)
       if element.data[1] != @data[1]
