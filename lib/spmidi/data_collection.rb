@@ -1,17 +1,16 @@
 #!/usr/local/bin/ruby
 require 'unimidi'
-
 require_relative 'note'
 
 module SPMidi
   class DataCollection
-    def runtime()
+    attr_accessor :record_buffer
+
+    def runtime
       # KORG nanoKEY2 produces notes from C_octave5 down to C_octave3
       # assuming MIDI keyboard is last input
       input = UniMIDI::Input.last
-      input.clear_buffer
 
-      # buff = Array.new
       prev_ts = 0 # use for relative timestamp
       start_ts = 0 # use to identify start of recording
 
@@ -23,12 +22,18 @@ module SPMidi
 
         # blocks until input comes in
         while m = input.gets[0]
-
           ts = m[:timestamp]
           data = m[:data]
 
           note = Note.new(data, ts - start_ts, ts - prev_ts)
           prev_ts = ts
+
+          # remove after beat_analysis complete
+          # quit note is pitch As5, [_,70,_]
+          # if note.data[1] == 70 && note.data[0] == 144
+          #   record_buffer.each {|x| puts x.rel_ts}
+          #   return record_buffer
+          # end
 
           if record
             if note.data == [176,64,0]
@@ -46,11 +51,12 @@ module SPMidi
             # not recording
             # print only the on-notes
             if note.data[0] == 144
-              note.sp_ambi_print
+              note.sp_letter_print
             end
           end
 
           # initialise recording if applicable
+          # sustain button on korg nanokey2 for on/off
           if note.data == [176,64,127] # on-value as specified by keyboard
             record = true
             record_buffer = []
@@ -60,7 +66,5 @@ module SPMidi
         end
       end
     end
-    d = DataCollection.new
-    d.runtime()
   end
 end
