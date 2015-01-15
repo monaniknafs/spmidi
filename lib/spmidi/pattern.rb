@@ -14,6 +14,10 @@ module SPMidi
       @confidence = 0 # the number of times the pattern has been seen
     end
 
+    def ==(pattern)
+      return @elements == pattern.elements
+    end
+
     def add(note)
       @elements << PatternElement.new(note)
       @length += 1
