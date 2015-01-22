@@ -3,7 +3,7 @@ require_relative 'samples'
 
 module SPMidi
   class Note
-    attr_accessor :data, :ts, :rel_ts, :buff, :index
+    attr_accessor :data, :ts, :rel_ts
     
     def initialize(data, ts, rel_ts)
       @data = data # an array [status, pitch, velocity]
