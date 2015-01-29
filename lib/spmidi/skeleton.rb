@@ -19,25 +19,28 @@ module SPMidi
       # notes are internally changed to pattern element bigrams
       # represent bigrams implictly, 
       # as Hash element {..,pattern_element => to_pointers_set,..}
+
       pe = PatternElement.new(note)
       if @prev_el == nil # this should only happen on first call to function
-        @prev_el = pe # do i need to dup? i wouldn't think so..
+        @prev_el = pe.dup # do i need to dup? i wouldn't think so..
       else
         el = @prev_el.dup
-        # new bigram, possibly merged in next step
-        joint = {el => [pe].to_set}
-        @prev_el = pe
-        # TODO make sure overridden pattern_element equality function is used
-        print "joint\n#{joint}\n"
+        @prev_el = pe.dup # next method call's bigram head
 
-        # aren't being merged properly
-
-        # POSSIBLY FAILING merging method
-        s = @skeleton.merge(joint){|key,oldval,newval| oldval.merge(newval)}
+        s = Hash.new
+        merged = false
+        @skeleton.each do |key, val|
+          if key == el
+            s[key] = val.merge([pe].to_set)
+            merged = true
+          else 
+            s[key] = val
+          end
+        end
+        if !merged
+          s[el] = [pe].to_set
+        end
         @skeleton = s
-        print "skeleton\n#{@skeleton}\n"
-        print "skeleton size #{@skeleton.size}\n"
-        print "end\n"
       end
     end
   end
