@@ -46,8 +46,8 @@ module SPMidi
       end
       # remove
 
-      assert_equal(p_notes1.length, pi1.current.length)
-      for i in 0..pi1.current.length-1
+      assert_equal(p_notes1.length, pi1.current.elements.length)
+      for i in 0..pi1.current.elements.length-1
         assert_equal(p_notes1[i].rel_ts, pi1.current.elements[i].rel_ts)
         assert_equal(p_notes1[i].data, pi1.current.elements[i].data)
       end
@@ -106,8 +106,8 @@ module SPMidi
       end
       # remove
 
-      assert_equal(p_notes2.length, pi2.current.length)
-      for i in 0..pi2.current.length-1
+      assert_equal(p_notes2.length, pi2.current.elements.length)
+      for i in 0..pi2.current.elements.length-1
         assert_equal(p_notes2[i].rel_ts, pi2.current.elements[i].rel_ts)
         assert_equal(p_notes2[i].data, pi2.current.elements[i].data)
       end
