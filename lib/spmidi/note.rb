@@ -14,8 +14,8 @@ module SPMidi
     def ==(note)
       # ts is not tested
       # ts is unique to note
-      # TODO: rethink equality of data, it is unlikely in my context
-      self.data == note.data && self.rel_ts == note.rel_ts
+      # TODO: rethink equality of data and rel_ts, it is unlikely in my context
+      self.data[1] == note.data[1] && self.rel_ts == note.rel_ts
     end
 
     def down_octave(x=1) 
