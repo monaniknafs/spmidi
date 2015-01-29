@@ -2,7 +2,7 @@ require_relative 'pattern_element'
 
 module SPMidi
   class Pattern
-    attr_accessor :elements, :length, :confidence
+    attr_accessor :elements, :confidence
     # test intialization with note for pattern element
     def initialize(notes = [])
       @elements = [] # contains elements in pattern in order of occurrence
@@ -10,7 +10,6 @@ module SPMidi
         e = PatternElement.new(note)
         @elements << e
       end
-      @length = @elements.length # length of note array
       @confidence = 0 # the number of times the pattern has been seen
     end
 
@@ -20,12 +19,10 @@ module SPMidi
 
     def add(note)
       @elements << PatternElement.new(note)
-      @length += 1
     end
 
     def trim_before(start)
-      @elements = @elements[start..@length-1]
-      @length = @elements.length
+      @elements = @elements[start..@elements.length-1]
     end
     
     def confirm()
@@ -44,7 +41,7 @@ module SPMidi
         # return true
       # else returns false
       # method isn't used at the momento
-      if index > @length-1
+      if index > @elements.length-1
         return false
       end
       e = PatternElement.new(note)
@@ -55,11 +52,11 @@ module SPMidi
       # if note occurs from point index onwards
         # return index of first occurrence
       # nil returned if false or invalid
-      if index > @length-1
+      if index > @elements.length-1
         return nil
       end
       e = PatternElement.new(note)
-      for i in index..@length-1
+      for i in index..@elements.length-1
         if @elements[i] == e
             return i
         end
