@@ -6,11 +6,11 @@ module SPMidi
     attr_accessor :current, :ph, :backlog, :matched, :prev
 
     def initialize()
-      @prev = [] # array of hash sets defining prev patterns
+      @prev = [] # array of prev patterns
       @current = Pattern.new # current pattern
       @ph = 0 # @ph is an index into pattern
       @backlog = [] # array of past seen elements
-      @matched = []# array of elements matched so far
+      @matched = [] # array of elements matched so far
     end
 
     def inc_ph()
@@ -25,7 +25,7 @@ module SPMidi
     def restore()
       @matched.each {|x| p x.data} # remove
       @current = Pattern.new(@backlog)
-      @ph = @current.length-1
+      @ph = @current.elements.length-1
       @matched = []
     end
 
@@ -93,7 +93,7 @@ module SPMidi
         if occurs == @ph
           puts "follows pattern" #remove
           match(element)
-          if @ph+1 == @current.length
+          if @ph+1 == @current.elements.length
             @current.confirm
             prev_add(@current)
           end
