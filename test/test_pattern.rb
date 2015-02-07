@@ -11,7 +11,7 @@ module SPMidi
        Note.new([1,2,3],0.7,0.3),
        Note.new([1,2,3],0.5,0.3)]
       p1 = Pattern.new(notes1)
-      puts p1.length
+      puts p1.elements.length
       # assert first occurrence is returned and nothing else
       assert_equal(2,p1.occurs_after?(Note.new([1,2,3],0.7,0.3),1))
       # assert timestamp has no impact on note matching
