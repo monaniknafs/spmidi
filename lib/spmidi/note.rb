@@ -12,10 +12,21 @@ module SPMidi
     end
 
     def ==(note)
+      @data[1] == note.data[1] && 
+      @rel_ts == note.rel_ts
+    end
+
+    def eql?(note)
       # ts is not tested
       # ts is unique to note
       # TODO: rethink equality of data and rel_ts, it is unlikely in my context
-      self.data[1] == note.data[1] && self.rel_ts == note.rel_ts
+      @data[1] == note.data[1] && 
+      @rel_ts == note.rel_ts && 
+      note.ts == note.ts
+    end
+
+    def hash
+      @data.dup.concat([@rel_ts]).hash
     end
 
     def down_octave(x=1) 
@@ -60,6 +71,10 @@ module SPMidi
 
     def lock_ts(element)
       @ts = lock_to_structure("ts", element)
+    end
+
+    def print
+      puts "data: #{data}, rel ts: #{rel_ts}"
     end
 
     def sp_number_print()
