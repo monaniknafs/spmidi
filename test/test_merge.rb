@@ -36,7 +36,7 @@ module SPMidi
 
       s = Set.new
       s << p1
-      assert_true(s.member?(p1))
+      assert_equal(true,s.member?(p1))
     end
   end
 end
