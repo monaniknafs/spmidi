@@ -1,5 +1,6 @@
 require 'set'
 require_relative 'pattern_element'
+require_relative 'skeleton'
 
 module SPMidi
   class HMM
@@ -11,16 +12,16 @@ module SPMidi
     attr_reader :trans
     attr_reader :emis
     attr_reader :cur_root
+    attr_reader :processed
 
     def initialize
       @cur_root = nil
       @alphabet = []
       @states = []
-      @emis = Hash.new
-      @trans = Hash.new
-      @emis_pr = Hash.new
-      @trans_pr = Hash.new
-      @init_pr = Hash.new
+      @emis_pr = Skeleton.new
+      @trans_pr = Skeleton.new
+      @init_pr = Hash.new # TODO think of something logical for initial states
+      @processed = false
     end
 
     def add(note)
@@ -28,84 +29,48 @@ module SPMidi
 
       # i want everything referencing the same thing
       element = PatternElement.new(note)
-      merged_cur = false
-      merged_nxt = false
 
       if @cur_root == nil
         # first call to add
         @states << element
-        @emis[element] = []
-        @trans[element] = []
-        @cur_root = element
       else
         root = @cur_root.dup
         # add to emis Hash
-        @emis.each do |rt, dn|
-          if rt == root
-            merged_cur = true
-            merged_trns = false
-            # merge into emis, trans
-            @emis[rt] << note
-            @trans[rt].each do |el|
-              if el == element
-                merged_trns = true
-              end
-            end
-            if !merged_trns
-              @trans[rt] << element
-            end
-          end
-          if rt == element
-            merged_nxt = true
-          end
-        end
-        if !merged_cur
-          @states << root
-          @emis[root] = note
-          @trans[root] = element
-        end
-        if !merged_nxt
-          @states << element
-          @emis[element] = []
-          @trans[element] = []
-        end
-        # prepare for next call
-        @cur_root = element
+        @emis_pr.merge(root, note)
+        @trans_pr.merge(root, element, true)
       end
+      # prepare for next call
+      @cur_root = element
     end
 
     def process
-      # initialise emission probabilities
-      @emis.each do |root, notes|
-        if !@emis_pr.has_key?(root)
-          @emis_pr[root] = {}
-        end
+      # add emission probabilities
+      @emis_pr.joints.each do |root, notes|
         total = notes.size
-        pr = 1.0/total
-        notes.each do |n|
-          pr = 1.0/total
-          @emis_pr[root] = @emis_pr[root].merge({n => pr})
+        prob = 1.0/total
+        notes.each do |n, pr|
+          notes[n] = prob
         end
       end
-      # initialise transition probabilities
-      @trans.each do |root, elements|
-        if !@trans_pr.has_key?(root)
-          @trans_pr[root] = {}
-        end
+
+      # add transition probabilities
+      @trans_pr.joints.each do |root, elements|
         total = 0
-        elements.each do |el|
+        elements.each do |el,pr|
           total += el.n
         end
-        elements.each do |el|
-          pr = Float(el.n)/total
-          @trans_pr[root] = @trans_pr[root].merge({el => pr})
+        elements.each do |el, pr|
+          prob = Float(el.n)/total
+          elements[el] = prob
         end
       end
+
       # initialise initial probabilities
-      total = @trans.size
-      @trans.each do |root, elements|
+      total = @trans_pr.joints.size
+      @trans_pr.joints.each do |root, elements|
         @init_pr[root] = 1.0/total
       end
+      processed = true
     end
   end
 end
