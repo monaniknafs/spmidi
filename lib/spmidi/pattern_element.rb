@@ -43,6 +43,25 @@ module SPMidi
       end 
     end
 
+    def eql?(element)
+      # for use when don't want to add to distribution
+      if element == nil
+        return false
+      end
+      if element.data[1] != @data[1]
+        return false
+      end
+      # rel tstamps are normally distributed,
+      # using line of regression, approx standard deviation:
+      sd = 44 + 0.0447*(@mean_ts - 637)
+      if (element.mean_ts >= @mean_ts - sd && element.mean_ts <= @mean_ts + sd)
+        # element is defined equal when within one standard deviatation
+        return true
+      else
+        return false
+      end 
+    end
+
     def print
       puts "data: #{data}, rel ts: #{mean_ts}"
     end
