@@ -62,36 +62,14 @@ module SPMidi
       goes4 = Set.new [p1]
       emis_assert = {p1 => goes1, p2 => goes2, p3 => goes3, p6 => goes4}
 
-      assert_equal(hmm.trans.size, emis_assert.size)
-      assert_equal(hmm.trans.keys, emis_assert.keys)
+      assert_equal(hmm.emis_pr.joints.size, emis_assert.size)
+      assert_equal(hmm.emis_pr.joints.keys, emis_assert.keys)
       # need a way to test values
       # probably have to loop through Hash
 
-      puts "emissions\n"
-      hmm.emis.each do |root, destns|
-        puts "#{root.print} => "
-        destns.each do |d|
-          # iterate through array of notes
-          puts d.class
-          d.print
-        end
-        puts "\n"
-      end
-
-      puts "transitions\n"
-      hmm.trans.each do |root, destns|
-        puts "#{root.print} => "
-        destns.each do |d|
-          # iterate through array of pelements
-          puts d.class
-          d.print
-        end
-        puts "\n"
-      end
-
       hmm.process      
       puts "emission probabilities\n"
-      hmm.emis_pr.each do |root, destns|
+      hmm.emis_pr.joints.each do |root, destns|
         puts "#{root.print} => "
         destns.each do |note, pr|
           # iterate through Hash of notes=>probability
@@ -102,7 +80,7 @@ module SPMidi
       end
 
       puts "transition probabilities\n"
-      hmm.trans_pr.each do |root, destns|
+      hmm.trans_pr.joints.each do |root, destns|
         puts "#{root.print} => "
         destns.each do |pe, pr|
           # iterate through Hash of pelements=>probability
