@@ -36,8 +36,8 @@ module SPMidi
       else
         root = @cur_root.dup
         # add to emis Hash
-        @emis_pr.merge(root, note)
-        @trans_pr.merge(root, element, true)
+        @emis_pr.merge(root, note, 0.0)
+        @trans_pr.merge(root, element, 0.0, true)
       end
       # prepare for next call
       @cur_root = element
