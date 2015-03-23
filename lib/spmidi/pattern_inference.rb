@@ -23,7 +23,7 @@ module SPMidi
     end
 
     def restore()
-      @matched.each {|x| p x.data} # remove
+      # @matched.each {|x| p x.data} # remove
       @current = Pattern.new(@backlog)
       @ph = @current.elements.length-1
       @matched = []
@@ -57,8 +57,8 @@ module SPMidi
           mlen = m.length
           c = @current.elements[j,mlen]
           if m == c
-            puts "i-index for matched = #{i}" # remove
-            puts "j-index for matched = #{j}" # remove
+            # puts "i-index for matched = #{i}" # remove
+            # puts "j-index for matched = #{j}" # remove
             substring = @current.elements[j,clen].dup
             @matched = elements
             @ph = mlen-1
@@ -69,10 +69,11 @@ module SPMidi
       return substring
     end
 
+    # this should be called add(element)
     def find_pattern_size(element)
-      puts "pass number #{@index}" # remove
-      puts "element: #{element.data}" # remove
-      puts "placeholder: #{ph}" # remove
+      # puts "pass number #{@index}" # remove
+      # puts "element: #{element.data}" # remove
+      # puts "placeholder: #{ph}" # remove
 
       save(element) # put element in backlog list
 
@@ -80,18 +81,17 @@ module SPMidi
         occurs = @current.occurs_after?(element,0) # occurrence in pattern
         if occurs != nil
           @current.trim_before(occurs)
-          puts element.class
           match(element)
           @current.confirm
           prev_add(@current)
-          puts "confirmed" # remove
+          # puts "confirmed" # remove
         else
           @current.add(element)
         end
       else # have already confirmed pattern
         occurs = @current.occurs_after?(element, @ph)
         if occurs == @ph
-          puts "follows pattern" #remove
+          # puts "follows pattern" #remove
           match(element)
           if @ph+1 == @current.elements.length
             @current.confirm
@@ -99,31 +99,31 @@ module SPMidi
           end
         else
           if occurs != nil
-            (@matched).each {|x| p x.data} # remove
+            # (@matched).each {|x| p x.data} # remove
             new_current = backlog_match(@matched.dup << element) 
-            puts "" # remove
-            (@matched.dup << element).each {|x| p x.data} # remove
-            puts "follows pattern subset" # remove
-            @backlog.each {|x| p x.data} # remove
-            puts "" # remove
+            # puts "" # remove
+            # (@matched.dup << element).each {|x| p x.data} # remove
+            # puts "follows pattern subset" # remove
+            # @backlog.each {|x| p x.data} # remove
+            # puts "" # remove
             @current = Pattern.new(new_current.dup)
             @current.confirm()
             prev_add(@current)
-            (@matched).each {|x| p x.data} # remove
-            if @current.elements.length == 0 #remove
-              puts "empty current pattern" #remove
-            end #remove
+            # (@matched).each {|x| p x.data} # remove
+            # if @current.elements.length == 0 #remove
+            #   puts "empty current pattern" #remove
+            # end #remove
           else
-            puts "doesn't follow pattern" # remove
+            # puts "doesn't follow pattern" # remove
             restore()
           end
         end
       end
-      puts "current array:" # remove
-      @current.print # remove
-      puts "" # remove
+      # puts "current array:" # remove
+      # @current.print # remove
+      # puts "" # remove
       inc_ph()
-      puts "current confidence: #{@current.confidence}" # remove
+      # puts "current confidence: #{@current.confidence}" # remove
     end # def find_pattern_size
   end # class pattern_inference
 end # module SPMidi
