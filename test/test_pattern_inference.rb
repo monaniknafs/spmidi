@@ -38,13 +38,10 @@ module SPMidi
       elements1.each do |el|
         pi1.find_pattern_size(el)
       end
-
-      # remove
-      pi1.prev.each do |x|
-        puts "pattern"
-        x.print
+      puts "first patten inferred:"
+      pi1.current.elements.each do |e|
+        e.print
       end
-      # remove
 
       assert_equal(p_elements1.length, pi1.current.elements.length)
       for i in 0..pi1.current.elements.length-1
@@ -97,19 +94,57 @@ module SPMidi
       elements2.each do |el|
         pi2.find_pattern_size(el)
       end
-
-      # remove
-      pi2.prev.each do |x|
-        puts "pattern"
-        x.print
-        p x.confidence
+      puts "second patten inferred:"
+      pi2.current.elements.each do |e|
+        e.print
       end
-      # remove
 
       assert_equal(p_elements2.length, pi2.current.elements.length)
       for i in 0..pi2.current.elements.length-1
         assert_equal(p_elements2[i].mean_ts, pi2.current.elements[i].mean_ts)
         assert_equal(p_elements2[i].data, pi2.current.elements[i].data)
+      end
+
+      elements3 = [
+      PatternElement.new([144, 60, 71], 276.0),
+      PatternElement.new([144, 62, 71], 205.125),
+      PatternElement.new([144, 62, 74], 105.5),
+      PatternElement.new([144, 60, 71], 157.21875),
+      PatternElement.new([144, 62, 69], 265.3125),
+      PatternElement.new([144, 60, 65], 261.9),
+      PatternElement.new([144, 62, 69], 194.62899305555555),
+      PatternElement.new([144, 62, 67], 104.23125),
+      PatternElement.new([144, 60, 59], 128.32196593915344),
+      PatternElement.new([144, 62, 70], 207.375),
+      PatternElement.new([144, 60, 64], 262.1875),
+      PatternElement.new([144, 62, 69], 188.79166666666666),
+      PatternElement.new([144, 62, 73], 102.25),
+      PatternElement.new([144, 60, 65], 160.25),
+      PatternElement.new([144, 62, 68], 210.9375),
+      PatternElement.new([144, 60, 65], 194.44861111111112),
+      PatternElement.new([144, 62, 70], 185.17290013227512),
+      PatternElement.new([144, 62, 74], 97.31458333333333),
+      PatternElement.new([144, 60, 71], 132.6694416887125),
+      PatternElement.new([144, 62, 80], 200.51174768518518),
+      PatternElement.new([144, 60, 69], 245.5),
+      PatternElement.new([144, 62, 73], 195.02349537037037),
+      PatternElement.new([144, 62, 73], 95.928125),
+      PatternElement.new([144, 60, 68], 142.0984829695767),
+      PatternElement.new([144, 62, 66], 207.4375),
+      PatternElement.new([144, 60, 64], 262.28125),
+      PatternElement.new([144, 62, 72], 168.0),
+      PatternElement.new([144, 62, 72], 109.125),
+      PatternElement.new([144, 60, 70], 151.0),
+      PatternElement.new([144, 62, 59], 255.375)]
+
+      pi3 = PatternInference.new
+
+      elements3.each do |el|
+        pi3.find_pattern_size(el)
+      end
+      puts "third patten inferred:"
+      pi3.current.elements.each do |e|
+        e.print
       end
     end
   end
