@@ -12,13 +12,12 @@ module SPMidi
       n5 = Note.new([0,6,3],0.0,97.1)
       n6 = Note.new([0,4,1],0.1,19.8)
 
-      ns = [n1, n2, n3, n4, n5, n6]
-      n11 = Note.new([0,3,1],1.0,200.0) 
-      n12 = Note.new([0,5,3],1.1,120.1)
-      n13 = Note.new([0,6,3],1.7,100.3)
-      n14 = Note.new([1,3,1],1.5,193.7)
-      n15 = Note.new([0,6,3],1.0,97.1)
-      n16 = Note.new([0,4,1],1.1,19.8)
+      n11 = Note.new([0,3,1],1.0,203.0) 
+      n12 = Note.new([0,5,3],1.1,118.1)
+      n13 = Note.new([0,6,3],1.7,113.3)
+      n14 = Note.new([1,3,1],1.5,183.7)
+      n15 = Note.new([0,6,3],1.0,100.1)
+      n16 = Note.new([0,4,1],1.1,19.9)
 
       p1 = PatternElement.new(n1)
       p2 = PatternElement.new(n2)
@@ -60,10 +59,10 @@ module SPMidi
       goes2 = Set.new [p3]
       goes3 = Set.new [p1,p6]
       goes4 = Set.new [p1]
-      emis_assert = {p1 => goes1, p2 => goes2, p3 => goes3, p6 => goes4}
+      trans_assert = {p1 => goes1, p2 => goes2, p3 => goes3, p6 => goes4}
 
-      assert_equal(hmm.emis_pr.joints.size, emis_assert.size)
-      assert_equal(hmm.emis_pr.joints.keys, emis_assert.keys)
+      assert_equal(hmm.trans_pr.joints.size, trans_assert.size)
+      assert_equal(hmm.trans_pr.joints.keys, trans_assert.keys)
       # need a way to test values
       # probably have to loop through Hash
 
