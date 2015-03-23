@@ -1,9 +1,8 @@
 module SPMidi
   class PatternElement
-    attr_reader :data, :timestamps, :mean_ts, :n 
+    attr_reader :data, :timestamps, :mean_ts, :sd, :n, :th
 
     def initialize(*args)
-      @n = 1 # number of (rel) timestamp elements deemed equal
       if args.size == 2
         @data = args[0]
         @mean_ts = args[1]
@@ -15,6 +14,9 @@ module SPMidi
       else
         puts 'error: pattern element initialize takes 1 or 2 arguments'
       end
+      @n = 1 # number of (rel) timestamp elements deemed equal
+      @sd = 44 + 0.0447*(@mean_ts - 637)
+      @th = 3.0 # num of standard deviations around mean_ts tolerated for equality of ts
     end
 
     def ==(element)
@@ -27,9 +29,7 @@ module SPMidi
       # rel tstamps are normally distributed
       # DECISION: underlying timestamps are in MIDI units
       # sonic pi units can come into play in the higher level
-      # using line of regression, approx standard deviation:
-      sd = 44 + 0.0447*(@mean_ts - 637)
-      if (element.mean_ts >= @mean_ts - sd && element.mean_ts <= @mean_ts + sd)
+      if (element.mean_ts >= @mean_ts - @th*@sd && element.mean_ts <= @mean_ts + @th*@sd)
         # element is defined equal when within one standard deviatation
         # TODO: revise this assumption, by looking at distributions of sample data sets
         prev_mean_ts = @mean_ts
@@ -37,6 +37,8 @@ module SPMidi
         @timestamps << element.mean_ts
         # equation from mmethods supervision exercises
         @mean_ts = prev_mean_ts + (element.mean_ts - prev_mean_ts)/@n # is this a risky subtraction to be doing?
+        # using line of regression, approx new standard deviation:
+        @sd = 44 + 0.0447*(@mean_ts - 637)
         return true
       else
         return false
@@ -53,8 +55,7 @@ module SPMidi
       end
       # rel tstamps are normally distributed,
       # using line of regression, approx standard deviation:
-      sd = 44 + 0.0447*(@mean_ts - 637)
-      if (element.mean_ts >= @mean_ts - sd && element.mean_ts <= @mean_ts + sd)
+      if (element.mean_ts >= @mean_ts - @th*@sd && element.mean_ts <= @mean_ts + @th*@sd)
         # element is defined equal when within one standard deviatation
         return true
       else
