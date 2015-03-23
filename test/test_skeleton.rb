@@ -16,12 +16,12 @@ module SPMidi
       p6 = PatternElement.new([1,4,1],230.0)
 
       sk = Skeleton.new(true)
-      sk.merge(p1,p2,0.25,true)
-      sk.merge(p1,p3,0.34,true)
-      sk.merge(p3,p4,0.55,true)
-      sk.merge(p4,p5,0.66,true)
-      sk.merge(p5,p4,0.77,true)
-      sk.merge(p4,p3,0.43,true)
+      sk.merge(p1,p2,0.25)
+      sk.merge(p1,p3,0.34)
+      sk.merge(p3,p4,0.55)
+      sk.merge(p4,p5,0.66)
+      sk.merge(p5,p4,0.77)
+      sk.merge(p4,p3,0.43)
 
       puts sk.get_nested_destn(almost_p1,almost_p2)
 
