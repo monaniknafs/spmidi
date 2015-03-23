@@ -1,6 +1,8 @@
 #!/usr/local/bin/ruby
 require 'unimidi'
 require_relative 'note'
+require_relative 'pattern_element'
+require_relative 'pattern_inference'
 
 module SPMidi
   class DataCollection
@@ -13,6 +15,8 @@ module SPMidi
 
       prev_ts = 0 # use for relative timestamp
       start_ts = 0 # use to identify start of recording
+
+      pi = PatternInference.new
 
       # runtime behaviour
       input.open do |input|
@@ -40,11 +44,16 @@ module SPMidi
               record = false
               start_ts = ts
               puts "stopped recording"
-              record_buffer.each {|x| x.sp_letter_print}
+              # record_buffer.each {|x| x.sp_letter_print}
+              puts "inferrred pattern:"
+              pi.current.elements.each do |e|
+                e.print
+              end
             else
               if note.data[0] == 144
                 note.lock_rel_ts(1/8.0)
                 record_buffer << note
+                pi.find_pattern_size(PatternElement.new(note))
               end
             end
           else
@@ -65,6 +74,8 @@ module SPMidi
           end
         end
       end
-    end
-  end
-end
+    end # def runtime
+  end # class DataCollection
+  dc = DataCollection.new
+  dc.runtime
+end # module SPMidi
