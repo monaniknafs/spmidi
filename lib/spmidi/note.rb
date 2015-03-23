@@ -19,10 +19,7 @@ module SPMidi
     def eql?(note)
       # ts is not tested
       # ts is unique to note
-      # TODO: rethink equality of data and rel_ts, it is unlikely in my context
-      @data[1] == note.data[1] && 
-      @rel_ts == note.rel_ts && 
-      note.ts == note.ts
+      @data[1] == note.data[1]
     end
 
     def hash
