@@ -4,21 +4,25 @@ require_relative 'pattern_element'
 module SPMidi
   class Skeleton
     attr_reader :joints 
+    attr_reader :trans
+    attr_reader :x
 
-    def initialize
+    def initialize(trans, x=nil)
       @joints = {}
+      @trans = trans
+      @x = x
     end
 
-    def merge(root, destn, nested_destn, trans=false)
+    def merge(root, destn, nested_destn)
       # form {pe => {pe1 => pr1, .., pen => prn}}
 
       # will need to search through all the joints for matching root
       merged_root = false
       @joints.each do |rt, dns|
-        if rt.eql?(root) # so elements aren't in distbn twice
-          merged_root = true
           # merge into joints
-          if trans == true
+        if @trans == true
+          if rt==root
+            merged_root = true
             merged_trans = false
             dns.each do |d, nd| # nd stands for nested destination
               if d==destn
@@ -28,7 +32,10 @@ module SPMidi
             if !merged_trans
               dns[destn] = nested_destn
             end
-          else
+          end
+        else
+          if rt==(root) # to produce representative mean_ts
+            merged_root = true
             dns[destn] = nested_destn
           end
         end
@@ -41,7 +48,7 @@ module SPMidi
     # used for viterbi
     # so doesn't need merging atm
 
-    def get_inner_destn(root, destn)
+    def get_nested_destn(root, destn)
       @joints.each do |rt, dns|
         if rt.eql?(root)
           dns.each do |d, nd| # nd stands for nested destination
@@ -51,11 +58,12 @@ module SPMidi
           end
         end
       end
+      return @x
     end
 
-    def set_inner_destn(root, destn, value)
+    def set_nested_destn(root, destn, value)
       # ASSERT: root => {destn => __} not present in joints
-      @joints[rt][destn] = value
+      @joints[root] = {destn => value}
     end
   end
 end
