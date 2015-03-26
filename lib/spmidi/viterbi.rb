@@ -32,8 +32,8 @@ module SPMidi
           @hmm.init_pr.each do |el, prob|
             # first element so nil backpointer
             pr = Math.log10(prob)
-            tr = Math.log10(@hmm.emis_pr.get_nested_destn(el, obs))
-            @viterbi[t][el] = [nil, pr + tr]
+            em = Math.log10(@hmm.emis_pr.get_nested_destn(el, obs))
+            @viterbi[t][el] = [nil, pr + em]
           end
         else # t != 0
           @hmm.states.each do |state|
