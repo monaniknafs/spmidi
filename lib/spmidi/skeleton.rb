@@ -8,6 +8,8 @@ module SPMidi
     attr_reader :x
 
     def initialize(trans, x=nil)
+      # joints in form:
+      # {root1 => {destn1=>p1,..,destnm=>pm},..}
       @joints = {}
       @trans = trans
       @x = x
