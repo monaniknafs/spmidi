@@ -58,5 +58,17 @@ module SPMidi
       assert_equal(4,p1.n)
       assert_equal(4,p1.timestamps.size)
     end
+
+    def test_wild_pitch
+      p1 = PatternElement.new(false, 20.8)
+      p2 = PatternElement.new([1,2,3], 20.9)
+      p3 = PatternElement.new(false, 20.7)
+      p4 = PatternElement.new([4,5,6],300.0)
+
+      assert_true(p1.eql?(p1))      
+      assert_true(p1.eql?(p2))
+      assert_true(p1.eql?(p3))
+      assert_false(p1.eql?(p4))
+    end
   end
 end
