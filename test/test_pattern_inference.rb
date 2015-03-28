@@ -6,7 +6,7 @@ require_relative '../lib/spmidi/pattern_inference'
 module SPMidi
   class TestPatternInference < Test::Unit::TestCase
 
-    def test_find_pattern_size
+    def test_find_pattern
       # p*_notes is array of notes in repeated pattern
 
       # test 1
@@ -36,7 +36,7 @@ module SPMidi
 
       pi1 = PatternInference.new
       elements1.each do |el|
-        pi1.find_pattern_size(el)
+        pi1.find_pattern(el)
       end
       puts "first patten inferred:"
       pi1.current.elements.each do |e|
@@ -92,7 +92,7 @@ module SPMidi
       pi2 = PatternInference.new
 
       elements2.each do |el|
-        pi2.find_pattern_size(el)
+        pi2.find_pattern(el)
       end
       puts "second patten inferred:"
       pi2.current.elements.each do |e|
@@ -140,12 +140,12 @@ module SPMidi
       pi3 = PatternInference.new
 
       elements3.each do |el|
-        pi3.find_pattern_size(el)
+        pi3.find_pattern(el)
       end
       puts "third patten inferred:"
       pi3.current.elements.each do |e|
         e.print
       end
-    end
+    end # def test_find_pattern
   end
 end

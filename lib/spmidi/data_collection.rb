@@ -53,7 +53,7 @@ module SPMidi
               if note.data[0] == 144
                 note.lock_rel_ts(1/8.0)
                 record_buffer << note
-                pi.find_pattern_size(PatternElement.new(note))
+                pi.find_pattern(PatternElement.new(note))
               end
             end
           else

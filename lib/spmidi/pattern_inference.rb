@@ -70,7 +70,7 @@ module SPMidi
     end
 
     # this should be called add(element)
-    def find_pattern_size(element)
+    def find_pattern(element)
       # puts "pass number #{@index}" # remove
       # puts "element: #{element.data}" # remove
       # puts "placeholder: #{ph}" # remove
@@ -124,6 +124,6 @@ module SPMidi
       # puts "" # remove
       inc_ph()
       # puts "current confidence: #{@current.confidence}" # remove
-    end # def find_pattern_size
+    end # def find_pattern
   end # class pattern_inference
 end # module SPMidi
