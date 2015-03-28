@@ -20,7 +20,7 @@ module SPMidi
       @cur_root = nil
       @alphabet = []
       @states = []
-      @x = 0.1
+      @x = 0.15
       @emis_pr = Skeleton.new(false, @x)
       @trans_pr = Skeleton.new(true, @x)
       @init_pr = Hash.new # TODO think of something logical for initial states
@@ -87,8 +87,10 @@ module SPMidi
       end
 
       # add transition probabilities
+      root_total = 0
       tport_pr = @trans_pr.x
       @trans_pr.joints.each do |root, elements|
+        root_total += root.n
         total = 0
         elements.each do |el,pr|
           total += el.n
@@ -100,9 +102,8 @@ module SPMidi
       end
 
       # initialise initial probabilities
-      total = @states.size
-      @states.each do |s|
-        @init_pr[s] = 1.0/total # probability
+      @trans_pr.joints.each do |root, elements|
+        @init_pr[root] = Float(root.n) / Float(root_total)
       end
       @processed = true
     end
