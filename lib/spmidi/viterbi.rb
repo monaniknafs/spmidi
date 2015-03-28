@@ -11,15 +11,71 @@ module SPMidi
     attr_reader :processed
 
     def initialize(obs, hmm)
-      @obs_seq = obs # note array
-      @path_size = obs.size
-      @viterbi = Array.new(@path_size) {Hash.new}
-      @viterbi.each do |v|  
-        v = []
-      end
       @hmm = hmm
-      @path = Array.new(@path_size) # [{element => prob}, .., ]
+      @obs_seq = obs # note array
+      @viterbi = Array.new(obs.size) {Hash.new}
+      @path = Array.new(obs.size) # [{element => prob}, .., ]
       @processed = false
+    end
+
+    def robust(th)
+      # run this method to make viterbi more robust
+      # by reducing type 2 errors
+      # using 2nd order transition memory
+      # TODO: now extend to reduce type 1 errors
+
+      if @obs_seq.size == 0
+        return
+      end
+      
+      new_seq = [] # new robust observation sequence
+      new_seq << @obs_seq[0]
+
+      for i in 1..@obs_seq.size-1
+        # search all pairs in the observation sequence
+        obs_wild = PatternElement.new(false, @obs_seq[i].rel_ts)
+
+        # find max( p({@obs_seq[i-1], *}))
+        max_tr = 0.0
+        max_el = nil
+        obs_prv = PatternElement.new(@obs_seq[i-1])
+        @hmm.trans_pr.joints.each do |root, destns|
+          if root.eql?(obs_prv)
+            destns.each do |d, pr|
+              if d.eql?(obs_wild)
+                tr = @hmm.trans_pr.get_nested_destn(root, d)
+                if tr > max_tr
+                  max_tr = tr
+                  max_el = d
+                end
+              end
+            end
+          end
+        end
+       
+        # add observation if no type2 error exists
+        # extra type1 error stuff
+        prv = PatternElement.new(@obs_seq[i-1])
+        cur = PatternElement.new(@obs_seq[i])
+        orig_tr = @hmm.trans_pr.get_nested_destn(prv, cur)
+        if max_tr > th
+          if max_tr > orig_tr + 0.3 # should I add anything to this?
+            new_seq << max_el.dup
+            puts "save different pitch #{max_el.data}"
+          else
+            new_seq << @obs_seq[i]
+            puts "save #{@obs_seq[i].data}"
+          end
+        else
+          puts "don't save #{@obs_seq[i].data}"
+          @obs_seq[i] = @obs_seq[i-1].dup
+        end
+      end
+      
+      # redefine things dependent on @obs_seq
+      @obs_seq = new_seq
+      @viterbi = Array.new(@obs_seq.size) {Hash.new}
+      @path = Array.new(@obs_seq.size)
     end
 
     def run
@@ -27,7 +83,7 @@ module SPMidi
       # [{l=>[k,pr],..,l=>[k,pr]},..,{l=>[k,pr],..,l=>[k,pr]}]
       t = 0
       # first pass
-      obs_seq.each do |obs|
+      @obs_seq.each do |obs|
         if t == 0
           @hmm.init_pr.each do |el, prob|
             # first element so nil backpointer
