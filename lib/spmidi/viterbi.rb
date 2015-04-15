@@ -9,12 +9,14 @@ module SPMidi
     attr_reader :hmm
     attr_reader :path
     attr_reader :processed
+    attr_reader :el_path
 
     def initialize(obs, hmm)
       @hmm = hmm
       @obs_seq = obs # note array
       @viterbi = Array.new(obs.size) {Hash.new}
       @path = Array.new(obs.size) # [{element => prob}, .., ]
+      @el_path = Array.new # [element_1,..,element_n]
       @processed = false
     end
 
@@ -80,7 +82,7 @@ module SPMidi
 
     def run
       # v contains results of each iteration of viterbi
-      # [{l=>[k,pr],..,l=>[k,pr]},..,{l=>[k,pr],..,l=>[k,pr]}]
+      # [ {l=>[k,pr],..,l=>[k,pr]} ,.., {l=>[k,pr],..,l=>[k,pr]} ]
       t = 0
       # first pass
       @obs_seq.each do |obs|
@@ -160,6 +162,10 @@ module SPMidi
           @path[t] = {corresponding_state => max_prev_pr}
         end
         t-=1
+      end
+      @path.each do |el_pr|
+        el = el_pr.keys[0]
+        @el_path << el
       end
       @processed = true
     end
