@@ -125,5 +125,12 @@ module SPMidi
       inc_ph()
       # puts "current confidence: #{@current.confidence}" # remove
     end # def find_pattern
+
+    # def find_pattern_now(el_array)
+    #   el_array.each do |el|
+    #     find_pattern(el)
+    #   end
+    # end # def find_pattern_now
+
   end # class pattern_inference
 end # module SPMidi
