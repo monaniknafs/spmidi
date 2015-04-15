@@ -12,14 +12,9 @@ module SPMidi
     end
 
     def ==(note)
+      # ts unique to each note, not tested
       @data[1] == note.data[1] && 
       @rel_ts == note.rel_ts
-    end
-
-    def eql?(note)
-      # ts is not tested
-      # ts is unique to note
-      @data[1] == note.data[1]
     end
 
     def hash
@@ -82,7 +77,7 @@ module SPMidi
     def sp_letter_print()
       # TODO: what units does sonic pi use between notes?
       # answer: ts relative to beats per minute; fix once integrated
-      puts "sleep #{@rel_ts/1000}"
+      puts "sleep #{@rel_ts/1000*2.0}"
       puts "play :#{note_letter()}"
     end
 
