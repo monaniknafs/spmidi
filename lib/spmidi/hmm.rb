@@ -20,9 +20,9 @@ module SPMidi
       @cur_root = nil
       @alphabet = []
       @states = []
-      @x = 0.15
+      @x = 0.1
       @emis_pr = Skeleton.new(false, @x)
-      @trans_pr = Skeleton.new(true, @x)
+      @trans_pr = Skeleton.new(true, 0.0)
       @init_pr = Hash.new # TODO think of something logical for initial states
       @processed = false
     end
