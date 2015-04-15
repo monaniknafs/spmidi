@@ -1,5 +1,6 @@
 module SPMidi
   class PatternElement
+    # TODO: remove :n it is unecessary since i have :timestamps.size
     attr_reader :data, :timestamps, :mean_ts, :sd, :n, :th, :wild_pitch
 
     def initialize(*args)
@@ -18,8 +19,8 @@ module SPMidi
 
       # test whether we have wildcard pitch
       @n = 1 # number of (rel) timestamp elements deemed equal
-      @sd = 44 + 0.0447*(@mean_ts - 637)
-      @th = 2.0 # num of standard deviations around mean_ts tolerated for equality of ts
+      @sd = (44 + 0.0447*(@mean_ts - 637)).abs
+      @th = 3.0 # num of standard deviations around mean_ts tolerated for equality of ts
     end
 
     def ==(element)
@@ -78,6 +79,44 @@ module SPMidi
         puts "data: *, rel ts: #{mean_ts}"
       else
         puts "data: #{data}, rel ts: #{mean_ts}"
+      end
+    end
+
+    def set_sp_ts
+      @sp_ts = @mean_ts / 1000.0 * 0.6
+    end
+
+    def sp_print
+      if @wild_pitch 
+        puts "can't print wild_pitch note in sonic pi"
+      else
+        puts "sleep #{@sp_ts}"
+        puts "play #{data[1]}"
+      end
+    end
+
+    def lock_mean_ts(incr)
+      # min_time_element in milliseconds
+      # lock relative ts to structure
+      r = @mean_ts % incr
+      return @mean_ts - r + (r >= incr / 2.0 ? incr : 0)
+    end  
+
+    def lock_sp_ts(incr)
+      # min_time_element in milliseconds
+      # lock relative ts to structure
+      @sp_ts = @mean_ts / 1000.0 
+      r = @sp_ts % incr
+      return @sp_ts - r + (r >= incr / 2.0 ? incr : 0)
+    end      
+
+    def sp_drum_print
+      s = Samples.new
+      pitch = data[1]
+      reg_pitch = pitch - 48
+      if (reg_pitch).between?(0,17) 
+        puts "sleep #{@mean_ts/500.0}"
+        puts "sample :#{s.drum(reg_pitch)}"
       end
     end
   end
