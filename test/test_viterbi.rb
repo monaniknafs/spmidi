@@ -19,9 +19,10 @@ module SPMidi
       n111 = Note.new([0,3,1],0.0,170.0)
       n_extra = Note.new([0,9,1],1.1,19.9)
       n_oops = Note.new([1,9,1],0.3,200.8)
+      n_lol = Note.new([1,43,0],3.0,200.0)
       n_a = Note.new([0,1,2],1.0,88.0)
       n_b = Note.new([0,1,3],1.0,100.0)
-      notes = [n1,n2,n3,n4,n_extra,n5,n6,n_oops,n12,n13,n14,n15,n16,n11,n_oops,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n_a,n_b,n16,n11,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n111,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16]
+      notes = [n1,n2,n3,n4,n_extra,n5,n6,n_oops,n12,n13,n14,n15,n16,n11,n_oops,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n_a,n_b,n16,n11,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n111,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n11,n12,n13,n14,n15,n16,n_lol,n12,n13,n14,n15,n16]
 
       hmm = HMM.new
       notes.each do |note|
