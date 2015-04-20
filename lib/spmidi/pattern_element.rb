@@ -1,7 +1,7 @@
 module SPMidi
   class PatternElement
     # TODO: remove :n it is unecessary since i have :timestamps.size
-    attr_reader :data, :timestamps, :mean_ts, :sd, :n, :th, :wild_pitch
+    attr_reader :data, :timestamps, :mean_ts, :sd, :n, :th, :wild_pitch, :sp_ts, :wild_ts
 
     def initialize(*args)
       if args.size == 2
@@ -14,13 +14,17 @@ module SPMidi
         puts 'error: pattern element initialize takes 1 or 2 arguments'
         return
       end
-      @timestamps = [@mean_ts]
-      @wild_pitch = !@data ? true : false
 
-      # test whether we have wildcard pitch
-      @n = 1 # number of (rel) timestamp elements deemed equal
-      @sd = (44 + 0.0447*(@mean_ts - 637)).abs
+      @timestamps = [@mean_ts]
+      @n = 1 # number of (rel) timestamp elements in distribution
       @th = 3.0 # num of standard deviations around mean_ts tolerated for equality of ts
+      @sp_ts = nil
+
+      @wild_pitch = !@data ? true : false # otherwise @data is integer
+      @wild_ts = !@mean_ts ? true : false # otherwise @data is integer
+      if !@wild_ts
+        @sd = (44 + 0.0447*(@mean_ts - 637)).abs
+      end
     end
 
     def ==(element)
@@ -32,20 +36,34 @@ module SPMidi
         puts "can only be used with eql? method"
         return
       end
+
       if element.data[1] != @data[1]
         return false
       end
-      # rel tstamps are normally distributed
-      # DECISION: underlying timestamps are in MIDI units
-      # sonic pi units can come into play in the higher level
+
+      if @wild_ts
+        if !element.wild_ts
+          @wild_ts = false
+          prev_mean_ts = element.mean_ts
+          @n += element.n
+          @timestamps = element.timestamps 
+          for i in (0..@n-1)
+            @timestamps << element.mean_ts
+          end
+          @mean_ts = prev_mean_ts + (element.mean_ts - prev_mean_ts)/@n
+          @sd = 44 + 0.0447*(@mean_ts - 637)
+        else
+          @n += 1
+        end
+        return true
+      end
+
+      # underlying timestamps are in MIDI units
       if (element.mean_ts >= @mean_ts - @th*@sd && element.mean_ts <= @mean_ts + @th*@sd)
-        # element is defined equal when within one standard deviatation
-        # TODO: revise this assumption, by looking at distributions of sample data sets
         prev_mean_ts = @mean_ts
         @n += 1
         @timestamps << element.mean_ts
-        # equation from mmethods supervision exercises
-        @mean_ts = prev_mean_ts + (element.mean_ts - prev_mean_ts)/@n # is this a risky subtraction to be doing?
+        @mean_ts = prev_mean_ts + (element.mean_ts - prev_mean_ts)/@n
         # using line of regression, approx new standard deviation:
         @sd = 44 + 0.0447*(@mean_ts - 637)
         return true
@@ -82,10 +100,6 @@ module SPMidi
       end
     end
 
-    def set_sp_ts
-      @sp_ts = @mean_ts / 1000.0 * 0.6
-    end
-
     def sp_print
       if @wild_pitch 
         puts "can't print wild_pitch note in sonic pi"
@@ -105,9 +119,9 @@ module SPMidi
     def lock_sp_ts(incr)
       # min_time_element in milliseconds
       # lock relative ts to structure
-      @sp_ts = @mean_ts / 1000.0 
+      @sp_ts = @mean_ts / 1000.0
       r = @sp_ts % incr
-      return @sp_ts - r + (r >= incr / 2.0 ? incr : 0)
+      @sp_ts = @sp_ts - r + (r >= incr / 2.0 ? incr : 0.0)
     end      
 
     def sp_drum_print
