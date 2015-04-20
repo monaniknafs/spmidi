@@ -48,6 +48,7 @@ module SPMidi
 
     def backlog_match(elements)
       # naive string matching
+      # check if we have a substring match of current
       substring = []
       mlen = elements.length
       clen = @current.elements.length
