@@ -63,9 +63,8 @@ module SPMidi
 
               puts "inferrred pattern:"
               pi.current.elements.each do |e|
-                e.set_sp_ts
-                locked = PatternElement.new(e.data,e.lock_sp_ts(1/16.0))
-                locked.sp_drum_print
+                e.lock_sp_ts(1/16.0)
+                e.sp_print
               end
             else
               if note.data[0] == 144
