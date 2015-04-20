@@ -55,6 +55,7 @@ module SPMidi
       p1 == p4
       p1 == p5
 
+      assert_false(p1.wild_ts)
       assert_equal(4,p1.n)
       assert_equal(4,p1.timestamps.size)
     end
@@ -69,6 +70,19 @@ module SPMidi
       assert_true(p1.eql?(p2))
       assert_true(p1.eql?(p3))
       assert_false(p1.eql?(p4))
+    end
+
+    def test_wild_ts
+      p1 = PatternElement.new([1,27,1], false)
+      p2 = PatternElement.new([1,27,1], 70.2)
+      p3 = PatternElement.new([1,27,1], false)
+
+      assert_true(p1==p3)
+      assert_equal(p1.timestamps, [70.2,70.2])
+      assert_true(p1==p2)
+      assert_equal(p1.n,3)
+      assert_equal(p1.timestamps, [70.2,70.2,70.2])
+      assert_equal(p1.mean_ts, 70.2)
     end
   end
 end
