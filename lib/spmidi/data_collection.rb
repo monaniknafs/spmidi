@@ -8,7 +8,10 @@ require_relative 'viterbi'
 
 module SPMidi
   class DataCollection
-    attr_accessor :record_buffer
+    attr_accessor :record_buffer, :incr
+    def initialize(incr)
+      @incr = incr
+    end
 
     def runtime
       # KORG nanoKEY2 produces notes from C_octave5 down to C_octave3
@@ -61,14 +64,28 @@ module SPMidi
                 pi.find_pattern(el)
               end
 
-              puts "inferrred pattern:"
+              ## Uncomment for normal output (1/3)
+              # puts "inferrred pattern:"
+
+              # prepare sp_loop for presentation
+              cum_ts = 0.0
+              sp_loop = []
               pi.current.elements.each do |e|
-                e.lock_sp_ts(1/16.0)
-                e.sp_print
+                sp_ts = e.sp_ts(@incr)
+                s = SPElement.new({
+                  :pitch => e.data[1], 
+                  :ts => cum_ts, 
+                  :rel_ts => sp_ts})
+                sp_loop << s
+                ## Uncomment for normal output (2/3)
+                # s.sp_print
+                cum_ts += sp_ts
               end
+
+              ## Uncomment for user test output
+              # return sp_loop
             else
               if note.data[0] == 144
-                # note.lock_rel_ts(1/8.0)
                 record_buffer << note
                 hmm.add(note)
               end
@@ -93,6 +110,9 @@ module SPMidi
       end
     end # def runtime
   end # class DataCollection
-  dc = DataCollection.new
-  dc.runtime
+
+  ## Uncomment for normal output (3/3)
+  # dc = DataCollection.new
+  # dc.runtime
+  
 end # module SPMidi
