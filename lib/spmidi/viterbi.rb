@@ -38,6 +38,7 @@ module SPMidi
         obs_wild = PatternElement.new(false, @obs_seq[i].rel_ts)
 
         # find max( p({@obs_seq[i-1], *}))
+        # if this is low, type 1 or 4 error exists
         max_tr = 0.0
         max_el = nil
         obs_prv = PatternElement.new(@obs_seq[i-1])
@@ -56,7 +57,7 @@ module SPMidi
         end
        
         # add observation if no type2 error exists
-        # extra type1 error stuff
+        # extra type1 error stuff within
         prv = PatternElement.new(@obs_seq[i-1])
         cur = PatternElement.new(@obs_seq[i])
         orig_tr = @hmm.trans_pr.get_nested_destn(prv, cur)
@@ -72,6 +73,8 @@ module SPMidi
           puts "don't save #{@obs_seq[i].data}"
           @obs_seq[i] = @obs_seq[i-1].dup
         end
+
+        # type3 error things
       end
       
       # redefine things dependent on @obs_seq
