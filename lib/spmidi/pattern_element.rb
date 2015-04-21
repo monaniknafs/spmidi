@@ -100,15 +100,6 @@ module SPMidi
       end
     end
 
-    def sp_print
-      if @wild_pitch 
-        puts "can't print wild_pitch note in sonic pi"
-      else
-        puts "sleep #{@sp_ts}"
-        puts "play #{data[1]}"
-      end
-    end
-
     def lock_mean_ts(incr)
       # min_time_element in milliseconds
       # lock relative ts to structure
@@ -116,12 +107,12 @@ module SPMidi
       return @mean_ts - r + (r >= incr / 2.0 ? incr : 0)
     end  
 
-    def lock_sp_ts(incr)
+    def sp_ts(incr)
       # min_time_element in milliseconds
       # lock relative ts to structure
-      @sp_ts = @mean_ts / 1000.0
-      r = @sp_ts % incr
-      @sp_ts = @sp_ts - r + (r >= incr / 2.0 ? incr : 0.0)
+      sp_ts = @mean_ts / 1000.0
+      r = sp_ts % incr
+      return sp_ts - r + (r >= incr / 2.0 ? incr : 0.0)
     end      
 
     def sp_drum_print
