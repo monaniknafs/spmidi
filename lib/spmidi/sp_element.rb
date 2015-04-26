@@ -34,7 +34,7 @@ module SPMidi
       s = Samples.new
       reg_pitch = @pitch - 48
       if (reg_pitch).between?(0,17) 
-        puts "sleep #{@rel_ts/500.0}"
+        puts "sleep #{@rel_ts}"
         puts "sample :#{s.drum(reg_pitch)}"
       end
     end
