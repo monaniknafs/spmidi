@@ -5,12 +5,13 @@ require_relative 'pattern_element'
 require_relative 'pattern_inference'
 require_relative 'hmm'
 require_relative 'viterbi'
+require_relative 'sp_element'
 
 module SPMidi
   class DataCollection
     attr_accessor :record_buffer, :incr
-    def initialize(incr)
-      @incr = incr
+    def initialize
+      @incr = 1.0/16 # must be Float
     end
 
     def runtime
@@ -22,6 +23,7 @@ module SPMidi
       start_ts = 0 # use to identify start of recording
 
       hmm = HMM.new
+      first = nil
 
       # runtime behaviour
       input.open do |input|
@@ -34,7 +36,8 @@ module SPMidi
           ts = m[:timestamp]
           data = m[:data]
 
-          note = Note.new(data, ts - start_ts, ts - prev_ts)
+          rel_ts = ts - prev_ts
+          note = Note.new(data, ts - start_ts, rel_ts)
           prev_ts = ts
 
           # remove after beat_analysis complete
@@ -65,7 +68,7 @@ module SPMidi
               end
 
               ## Uncomment for normal output (1/3)
-              # puts "inferrred pattern:"
+              puts "inferrred pattern:"
 
               # prepare sp_loop for presentation
               cum_ts = 0.0
@@ -78,7 +81,7 @@ module SPMidi
                   :rel_ts => sp_ts})
                 sp_loop << s
                 ## Uncomment for normal output (2/3)
-                # s.sp_print
+                s.sp_print
                 cum_ts += sp_ts
               end
 
@@ -86,6 +89,15 @@ module SPMidi
               # return sp_loop
             else
               if note.data[0] == 144
+                # if first == nil
+                #   first = note
+                # else
+                #   if note.data[1] == first.data[1]
+                #     first.set_rel_ts(note.rel_ts)
+                #     record_buffer[0] = first.dup
+                #   end
+                # end
+
                 record_buffer << note
                 hmm.add(note)
               end
@@ -112,7 +124,7 @@ module SPMidi
   end # class DataCollection
 
   ## Uncomment for normal output (3/3)
-  # dc = DataCollection.new
-  # dc.runtime
+  dc = DataCollection.new
+  dc.runtime
   
 end # module SPMidi
