@@ -13,6 +13,21 @@ module SPMidi
       @matched = [] # array of elements matched so far
     end
 
+    def best_pattern
+      best = Pattern.new
+      prev.each do |p|
+        if p.confidence > best.confidence
+          best = p
+        end
+      end
+      if best.confidence > 2
+        return best
+      else
+        puts "No pattern detected, please re-record desired pattern sequence"
+        return
+      end
+    end
+
     def inc_ph()
       if @current.confidence == 0
         @ph += 1
