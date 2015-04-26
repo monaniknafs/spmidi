@@ -20,7 +20,7 @@ module SPMidi
           best = p
         end
       end
-      if best.confidence > 2
+      if best.confidence >= 2
         return best
       else
         puts "No pattern detected, please re-record desired pattern sequence"
