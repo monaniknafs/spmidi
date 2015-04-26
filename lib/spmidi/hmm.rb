@@ -20,7 +20,7 @@ module SPMidi
       @cur_root = nil
       @alphabet = []
       @states = []
-      @x = 0.15
+      @x = 0.1
       @emis_pr = Skeleton.new(false, @x)
       @trans_pr = Skeleton.new(true, 0.0)
       @init_pr = Hash.new # TODO think of something logical for initial states
@@ -55,6 +55,13 @@ module SPMidi
       @cur_root = element
     end
 
+    def add_notes(note_array)
+      # used for testing purposes
+      note_array.each do |n|
+        add(n)
+      end
+    end
+
     def process
       tport_pr = @emis_pr.x 
       # add emission probabilities
@@ -73,7 +80,8 @@ module SPMidi
           #   total += 1.0/(mean - n.rel_ts).abs
           # end
           notes.each do |n, pr|
-            # prev defn: notes[n] = (1.0/(mean - n.rel_ts).abs)/total*(1-tport_pr) # probability
+            # use z-scores for probability 
+            ## stochastic distance metric from mean
             z = ((n.rel_ts - mean)/sd).abs
             rev_z = th-z
             notes[n] = rev_z
@@ -102,9 +110,44 @@ module SPMidi
       end
 
       # initialise initial probabilities
+      size = Float(@trans_pr.joints.size)
+      pos = 1.0 # represents position
+      sum_pos = Float(1.0/6) * size * (size + 1.0) * (2*size + 1.0)
+      puts "sum pos = #{sum_pos}"
+
+      # TODO
+      # I want to reorder the transition probability roots in an array
+      # to use to assign the initial probabilities in the appropriate order
+      # maybe I can make the first element wild_ts?
+      # do this , ensure when init_pr is used no errors are slippin'
+      # and see what errors come up 
+
+      # note this might not work as the frequency values is still off
+      # since first note should be different,
+      # but it's hard to define what before the hmm is made
+      # plan b: once transition elements are determined , then change the root element
+      # then calculate the probabilities
+
+      first = true
       @trans_pr.joints.each do |root, elements|
-        @init_pr[root] = Float(root.n) / Float(root_total)
+        sig = size + 1 - pos # significance
+        puts "sig = #{sig}"
+        pos_val = (sig * sig) / sum_pos
+        freq_val = Float(root.n) / Float(root_total)
+        if first 
+          root = PatternElement.new(root.data, false)
+          first = false
+        end
+        @init_pr[root] = (pos_val + freq_val) / 2.0
+        pos += 1
       end
+
+      tot = 0.0
+      @init_pr.each do |el, pr|
+        tot += pr
+      end
+      puts "total initial prob = #{tot}"
+
       @processed = true
     end
   end
