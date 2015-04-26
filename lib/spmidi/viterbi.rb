@@ -5,11 +5,8 @@ require_relative 'hmm'
 
 module SPMidi
   class Viterbi
-    attr_reader :obs_seq # array of notes, in order
-    attr_reader :hmm
-    attr_reader :path
-    attr_reader :processed
-    attr_reader :el_path
+    # obs_seq is Array of Notes
+    attr_reader :obs_seq, :hmm, :path, :processed, :el_path, :viterbi, :pad
 
     def initialize(obs, hmm)
       @hmm = hmm
@@ -18,75 +15,191 @@ module SPMidi
       @path = Array.new(obs.size) # [{element => prob}, .., ]
       @el_path = Array.new # [element_1,..,element_n]
       @processed = false
+      @pad = 0.2
+      @timeout_th = 5000.0
     end
 
+
     def robust(th)
-      # run this method to make viterbi more robust
-      # by reducing type 2 errors
-      # using 2nd order transition memory
-      # TODO: now extend to reduce type 1 errors
-
-      if @obs_seq.size == 0
-        return
+      puts "original obs sequence:"
+      @obs_seq.each do |n|
+        puts "#{n.data[1]}, #{n.rel_ts}"
       end
-      
-      new_seq = [] # new robust observation sequence
-      new_seq << @obs_seq[0]
+      # th isn't used at the moment
+      new_seq = []
+      prv = nil
+      for i in 0..obs_seq.size-2
+        cur = PatternElement.new(obs_seq[i])
+        nxt = PatternElement.new(obs_seq[i+1]) # need this for type b errors
+        if prv == nil
+          new_seq << obs_seq[i].dup
+          prv = cur.dup
+          next
+        end
 
-      for i in 1..@obs_seq.size-1
-        # search all pairs in the observation sequence
-        obs_wild = PatternElement.new(false, @obs_seq[i].rel_ts)
+        @hmm.trans_pr.joints.each do |rt, dstns|
+          if !rt.eql?(prv)
+            next
+          end
+          cur_pr = @hmm.trans_pr.get_nested_destn(prv,cur)
+          posn = PatternElement.new(false,cur.mean_ts)
 
-        # find max( p({@obs_seq[i-1], *}))
-        # if this is low, type 1 or 4 error exists
-        max_tr = 0.0
-        max_el = nil
-        obs_prv = PatternElement.new(@obs_seq[i-1])
-        @hmm.trans_pr.joints.each do |root, destns|
-          if root.eql?(obs_prv)
-            destns.each do |d, pr|
-              if d.eql?(obs_wild)
-                tr = @hmm.trans_pr.get_nested_destn(root, d)
-                if tr > max_tr
-                  max_tr = tr
-                  max_el = d
+          pr_c = 0.0
+          n_c = nil
+          pr_b_ins = 0.0
+          pr_b_nxt = 0.0
+          n_b_ins = nil 
+          n_b_nxt = nil
+          pr_a = 0.0
+          n_a = nil # element to insert between prv and cur
+          dstns.each do |d,pr|
+            if pr < cur_pr + @pad
+              next 
+            end
+            # if probability is below threshold, may have to do something
+            if d.eql?(posn)
+              puts "d = [#{d.data[1]},#{d.mean_ts}], posn = [*,#{posn.mean_ts}]"
+              # possible Type C
+              puts "oops"
+              if d.data[1] == cur.data[1]
+                # no error
+                # this shouldn't happen by defn of cur_pr
+                next
+              end
+                # possible type C error
+                if pr > pr_c
+                  puts "oops"
+                  pr_c = pr
+                  n_c = Note.new(d.data, 0.0, d.mean_ts) # TODO: work out the correct ts
                 end
+            elsif d.mean_ts < cur.mean_ts
+              # possible Type B (missing note)
+              ins = d
+              new_cur = PatternElement.new(cur.data,cur.mean_ts - d.mean_ts)
+              puts "cur = #{cur.data[1]}, #{cur.mean_ts}"
+              puts "new cur = #{new_cur.data[1]}, #{new_cur.mean_ts}"
+              pr_1 = pr
+              pr_2 = @hmm.trans_pr.get_nested_destn(d,new_cur) # here we might be using the teleportation probability :|
+
+              puts "pr_1 = #{pr_1}"
+              puts "pr_2 = #{pr_2}"
+
+              if pr_2 < cur_pr + @pad
+                next
+              end
+              if pr_1 * pr_2 > pr_b_ins * pr_b_nxt
+                pr_b_ins = pr_1
+                pr_b_nxt = pr_2
+                n_b_ins = Note.new(d.data, 0.0, d.mean_ts)
+                n_b_nxt = Note.new(new_cur.data, 0.0, new_cur.mean_ts)
+              end
+            else # d.mean_ts < cur.mean_ts
+              # possible Type A (extra note)
+              # the actual current note is added..
+              if pr > pr_a
+                pr_a = pr
+                puts "cur = #{cur.data[1]}, #{cur.mean_ts}"
+                n_a = Note.new(d.data, 0.0, d.mean_ts)
               end
             end
           end
-        end
-       
-        # add observation if no type2 error exists
-        # extra type1 error stuff within
-        prv = PatternElement.new(@obs_seq[i-1])
-        cur = PatternElement.new(@obs_seq[i])
-        orig_tr = @hmm.trans_pr.get_nested_destn(prv, cur)
-        if max_tr > th
-          if max_tr > orig_tr + 0.3 # should I add anything to this?
-            new_seq << max_el.dup
-            puts "save different pitch #{max_el.data}"
+          # assess whether there is an error
+          # to determine what to put in new_seq
+          if pr_a + pr_b_ins + pr_b_nxt + pr_c != 0.0
+            h = [{:c => pr_c}, {:b => Math.sqrt(pr_b_ins * pr_b_nxt)}, {:a => pr_a}]
+            h.sort!{|x,y| x.values[0] <=> y.values[0]}
+            error = h.last.keys[0]
+            h.each do |er|
+              p er
+            end
+            case error
+            when :a
+              # extra note to be removed
+              # remake the next note using carry
+              # don't add to new_seq
+              puts "a"
+              puts "#{cur.mean_ts}"
+              carry_ts = cur.mean_ts
+              obs_seq[i+1].set_rel_ts(obs_seq[i+1].rel_ts + carry_ts)
+              cur = prv.dup # for updating prv in a sec
+            when :b
+              # missing Note to be added
+              puts "b"
+              puts "#{cur.mean_ts}"
+              new_seq << n_b_ins.dup
+              new_seq << n_b_nxt.dup
+            when :c
+              puts "c"
+              puts "#{cur.mean_ts}"
+              # pitch to be substituted
+              new_seq << n_c.dup
+            else
+              puts "none"
+              puts "#{cur.mean_ts}"
+              # no error
+              new_seq << obs_seq[i].dup
+            end
           else
-            new_seq << @obs_seq[i]
-            puts "save #{@obs_seq[i].data}"
+            puts "none"
+            puts "#{cur.mean_ts}"
+            # no error
+            new_seq << obs_seq[i].dup
           end
-        else
-          puts "don't save #{@obs_seq[i].data}"
-          @obs_seq[i] = @obs_seq[i-1].dup
         end
-
-        # type3 error things
+        prv = cur.dup
       end
-      
-      # redefine things dependent on @obs_seq
+      new_seq << obs_seq.last.dup
+
       @obs_seq = new_seq
       @viterbi = Array.new(@obs_seq.size) {Hash.new}
       @path = Array.new(@obs_seq.size)
+      puts "new robust sequence:"
+      new_seq.each do |n|
+        puts "#{n.data[1]}, #{n.rel_ts}"
+      end
+      return new_seq
+    end
+
+    def revise(note,i)
+      # ASSERT note.rel_ts is greater than timeout
+      if i == @obs_seq.size-2
+        return note
+      end
+      el = PatternElement.new(note.data,false)
+      nxt = PatternElement.new(@obs_seq[i+1])
+      # TODO: determine if this method works with my problem
+      replacements = []
+      @hmm.trans_pr.joints.each do |rt, dstns|
+        if rt.mean_ts == note.rel_ts
+          next
+        end
+        if el.eql?(rt)
+          dstns.each do |d, pr|
+            if d.eql?(nxt)
+              puts "rt rel_ts is #{rt.mean_ts}\n"
+              replacements << {rt => pr}
+            end
+          end
+        end
+      end
+      # sorts wrt ascending probability
+      replacements.sort!{|x,y| x.values[0] <=> y.values[0]}
+      rvn = replacements.last.keys[0]
+      new_note = Note.new(rvn.data, note.ts, rvn.mean_ts)
+      return new_note
     end
 
     def run
       # v contains results of each iteration of viterbi
       # [ {l=>[k,pr],..,l=>[k,pr]} ,.., {l=>[k,pr],..,l=>[k,pr]} ]
+
+      if @obs_seq.size == 0
+        return
+      end
+
       t = 0
+      @obs_seq[0] = revise(obs_seq[0],0).dup
+
       # first pass
       @obs_seq.each do |obs|
         if t == 0
@@ -125,6 +238,7 @@ module SPMidi
       
       @viterbi.reverse_each do |v|
         # first find max prT
+        # if we are on last element
         if t == @viterbi.size-1
           max_pr = Math.log10(0.0)
           max_state = nil
