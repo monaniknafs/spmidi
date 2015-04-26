@@ -30,18 +30,9 @@ module SPMidi
       assert_equal(p3,p5)
 
       hmm = HMM.new
-      hmm.add(n1)
-      hmm.add(n2)
-      hmm.add(n3)
-      hmm.add(n4)
-      hmm.add(n5)
-      hmm.add(n6)
-      hmm.add(n11)
-      hmm.add(n12)
-      hmm.add(n13)
-      hmm.add(n14)
-      hmm.add(n15)
-      hmm.add(n16)
+      notes = [n1,n2,n3,n4,n5,n6,n11,n12,n13,n14,n15,n16]
+      hmm.add_notes(notes)
+
 
       puts "alphabet\n"
       hmm.alphabet.each do |note|
