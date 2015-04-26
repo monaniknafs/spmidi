@@ -58,12 +58,13 @@ module SPMidi
               viterbi = Viterbi.new(record_buffer,hmm)
               viterbi.robust(0.09) # adjustable variable
               # why aren't these all the same method already?
-              viterbi.run
-              viterbi.find_path
-              viterbi.print_path
+              # viterbi.run
+              # viterbi.find_path
+              # viterbi.print_path
 
               pi = PatternInference.new
-              viterbi.el_path.each do |el|
+              viterbi.obs_seq.each do |obs|
+                el = PatternElement.new(obs)
                 pi.find_pattern(el)
               end
 
@@ -73,7 +74,8 @@ module SPMidi
               # prepare sp_loop for presentation
               cum_ts = 0.0
               sp_loop = []
-              pi.current.elements.each do |e|
+              best = pi.best_pattern
+              best.elements.each do |e|
                 sp_ts = e.sp_ts(@incr)
                 s = SPElement.new({
                   :pitch => e.data[1], 
