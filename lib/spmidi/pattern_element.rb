@@ -21,7 +21,7 @@ module SPMidi
 
       @timestamps = nil
       @n = 1 # number of (rel) timestamp elements in distribution
-      @th = 3.0 # num of standard deviations around mean_ts tolerated for equality of ts
+      @th = 4.0 # num of standard deviations around mean_ts tolerated for equality of ts
       @sp_ts = nil
 
       @wild_pitch = !@data ? true : false # otherwise @data is integer
@@ -139,7 +139,7 @@ module SPMidi
     def sp_ts(incr)
       # min_time_element in milliseconds
       # lock relative ts to structure
-      sp_ts = @mean_ts / 1000.0
+      sp_ts = @mean_ts / 1000.0 * 2.7
       r = sp_ts % incr
       return sp_ts - r + (r >= incr / 2.0 ? incr : 0.0)
     end      
