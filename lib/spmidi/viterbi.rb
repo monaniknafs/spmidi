@@ -15,7 +15,7 @@ module SPMidi
       @path = Array.new(obs.size) # [{element => prob}, .., ]
       @el_path = Array.new # [element_1,..,element_n]
       @processed = false
-      @pad = 0.2
+      @pad = 0.4
       @timeout_th = 5000.0
     end
 
@@ -151,12 +151,14 @@ module SPMidi
       new_seq << obs_seq.last.dup
 
       @obs_seq = new_seq
+      @obs_seq[0] = revise(obs_seq[0],0).dup
       @viterbi = Array.new(@obs_seq.size) {Hash.new}
       @path = Array.new(@obs_seq.size)
       puts "new robust sequence:"
       new_seq.each do |n|
         puts "#{n.data[1]}, #{n.rel_ts}"
       end
+
       return new_seq
     end
 
@@ -183,10 +185,15 @@ module SPMidi
         end
       end
       # sorts wrt ascending probability
-      replacements.sort!{|x,y| x.values[0] <=> y.values[0]}
-      rvn = replacements.last.keys[0]
-      new_note = Note.new(rvn.data, note.ts, rvn.mean_ts)
-      return new_note
+      if replacements.size != 0
+        replacements.sort!{|x,y| x.values[0] <=> y.values[0]}
+        rvn = replacements.last.keys[0]
+        new_note = Note.new(rvn.data, note.ts, rvn.mean_ts)
+        return new_note
+      else
+        puts "unable to find replacement for first element"
+        return note
+      end
     end
 
     def run
