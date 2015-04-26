@@ -76,7 +76,9 @@ module SPMidi
       puts "\n"
 
       viterbi = Viterbi.new(obs,hmm)
-      viterbi.robust(0.09)
+      viterbi.robust(0.3)
+      
+      
       viterbi.run
       viterbi.find_path
       viterbi.print_path
@@ -89,7 +91,8 @@ module SPMidi
       end
 
       puts "pattern after viterbi etc:"
-      pi.current.elements.each do |el|
+      best = pi.best_pattern
+      best.elements.each do |el|
         el.print
       end
       puts "end of pattern\n"
