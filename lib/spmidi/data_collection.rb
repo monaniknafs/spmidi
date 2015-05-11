@@ -61,7 +61,6 @@ module SPMidi
               # # why aren't these all the same method already?
               viterbi.run
               viterbi.find_path
-              viterbi.print_path
 
               pi = PatternInference.new
               viterbi.obs_seq.each do |obs|
@@ -76,7 +75,8 @@ module SPMidi
               # prepare sp_loop for presentation
               cum_ts = 0.0
               sp_loop = []
-              best = pi.best_pattern
+              pi.permute
+              best = pi.best
               best.elements.each do |e|
                 sp_ts = e.sp_ts(@incr)
                 s = SPElement.new({
