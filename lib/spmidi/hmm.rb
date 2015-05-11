@@ -20,12 +20,11 @@ module SPMidi
       @cur_root = nil
       @alphabet = []
       @states = []
-      @x = 0.1
-      @emis_pr = Skeleton.new(false, @x)
-      @trans_pr = Skeleton.new(true, 0.0)
-      @init_pr = Hash.new # TODO think of something logical for initial states
+      @emis_pr = Skeleton.new(false)
+      @trans_pr = Skeleton.new(true)
+      @init_pr = {}
       @processed = false
-    end
+    end    
 
     def add(note)
       @alphabet << note
@@ -63,7 +62,6 @@ module SPMidi
     end
 
     def process
-      tport_pr = @emis_pr.x 
       # add emission probabilities
       @emis_pr.joints.each do |root, notes|
         total = 0.0
@@ -72,7 +70,7 @@ module SPMidi
         th = root.th # threshold
         if notes.size == 1
           notes.each do |n, pr|
-            notes[n] = 1.0*(1-tport_pr)
+            notes[n] = 1.0
           end
         else
           # part of prev definition
@@ -96,7 +94,6 @@ module SPMidi
 
       # add transition probabilities
       root_total = 0
-      tport_pr = @trans_pr.x
       @trans_pr.joints.each do |root, elements|
         root_total += root.n
         total = 0
@@ -104,7 +101,7 @@ module SPMidi
           total += el.n
         end
         elements.each do |el, pr|
-          prob = Float(el.n)/total*(1-tport_pr)
+          prob = Float(el.n)/total
           elements[el] = prob # probability
         end
       end
@@ -129,17 +126,30 @@ module SPMidi
       # then calculate the probabilities
 
       first = true
+      first_el = nil
+      first_pr = nil
       @trans_pr.joints.each do |root, elements|
         sig = size + 1 - pos # significance
         puts "sig = #{sig}"
         pos_val = (sig * sig) / sum_pos
         freq_val = Float(root.n) / Float(root_total)
         if first 
+          # TODO might want to merge this first element is all
+          # first element has wild timestamp
           root = PatternElement.new(root.data, false)
+          first_el = root
+          first_pr = (pos_val + freq_val) / 2.0
           first = false
         end
         @init_pr[root] = (pos_val + freq_val) / 2.0
         pos += 1
+      end
+
+      # sketchy
+      @init_pr.each do |el,pr|
+        if el.eql?(first_el)
+          @init_pr[first_el] = first_pr + pr
+        end
       end
 
       tot = 0.0
@@ -149,6 +159,35 @@ module SPMidi
       puts "total initial prob = #{tot}"
 
       @processed = true
+    end
+
+    def print_probabilities
+      puts "emission probabilities\n"
+      @emis_pr.joints.each do |root, destns|
+        puts "#{root.print} => "
+        destns.each do |note, pr|
+          # iterate through Hash of notes=>probability
+          note.print
+          puts "prob = #{pr}"
+        end
+        puts "\n"
+      end
+
+      puts "transition probabilities\n"
+      @trans_pr.joints.each do |root, destns|
+        puts "#{root.print} => "
+        destns.each do |pe, pr|
+          # iterate through Hash of pelements=>probability
+          pe.print
+          puts "prob = #{pr}"
+        end
+        puts "\n"
+      end
+
+      puts "initial probabilities\n"
+      @init_pr.each do |el, pr|
+        puts "#{el.print} => #{pr}\n"
+      end
     end
   end
 end

@@ -7,12 +7,12 @@ module SPMidi
     attr_reader :trans
     attr_reader :x
 
-    def initialize(trans, x=nil)
+    def initialize(trans)
       # joints in form:
       # {root1 => {destn1=>p1,..,destnm=>pm},..}
       @joints = {}
       @trans = trans
-      @x = x
+      @x = nil
     end
 
     def merge(root, destn, nested_destn)
@@ -51,6 +51,7 @@ module SPMidi
     # so doesn't need merging atm
 
     def get_nested_destn(root, destn)
+      tport_pr = 0.0
       @joints.each do |rt, dns|
         if rt.eql?(root)
           dns.each do |d, nd| # nd stands for nested destination
@@ -58,9 +59,14 @@ module SPMidi
               return nd
             end
           end
+          if !trans
+            tport_pr = 0.75 / dns.size
+            puts "dns.size = #{dns.size}"
+            puts "tport probability = #{tport_pr}"
+          end
         end
       end
-      return @x
+      return tport_pr
     end
 
     def set_nested_destn(root, destn, value)
