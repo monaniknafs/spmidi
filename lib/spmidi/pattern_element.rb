@@ -21,13 +21,13 @@ module SPMidi
 
       @timestamps = nil
       @n = 1 # number of (rel) timestamp elements in distribution
-      @th = 4.0 # num of standard deviations around mean_ts tolerated for equality of ts
+      @th = 3.0 # num of standard deviations around mean_ts tolerated for equality of ts
       @sp_ts = nil
 
       @wild_pitch = !@data ? true : false # otherwise @data is integer
       @wild_ts = !@mean_ts ? true : false # otherwise @data is integer
       if !@wild_ts
-        @sd = (44 + 0.0447*(@mean_ts - 637)).abs
+        @sd = 0.0447*@mean_ts + 15.8779
         @timestamps = [@mean_ts]
       end
     end
@@ -57,7 +57,7 @@ module SPMidi
             @timestamps << element.mean_ts
           end
           @mean_ts = prev_mean_ts + (element.mean_ts - prev_mean_ts)/@n
-          @sd = 44 + 0.0447*(@mean_ts - 637)
+          @sd = 0.0447*@mean_ts + 15.8779
         else
           @n += 1
         end
@@ -71,7 +71,7 @@ module SPMidi
         @timestamps << element.mean_ts
         @mean_ts = prev_mean_ts + (element.mean_ts - prev_mean_ts)/@n
         # using line of regression, approx new standard deviation:
-        @sd = 44 + 0.0447*(@mean_ts - 637)
+        @sd = 0.0447*@mean_ts + 15.8779
         return true
       else
         return false
@@ -139,8 +139,8 @@ module SPMidi
     def sp_ts(incr)
       # min_time_element in milliseconds
       # lock relative ts to structure
-      sp_ts = @mean_ts / 1000.0 * 2.7
-      r = sp_ts % incr
+      sp_ts = @mean_ts / 1000.0 * 1.15
+      r = sp_ts % incr 
       return sp_ts - r + (r >= incr / 2.0 ? incr : 0.0)
     end      
 
