@@ -11,7 +11,7 @@ module SPMidi
   class DataCollection
     attr_accessor :record_buffer, :incr
     def initialize
-      @incr = 1.0/16 # must be Float
+      @incr = 1.0/8 # must be Float
     end
 
     def runtime
@@ -54,13 +54,14 @@ module SPMidi
               puts "stopped recording"
 
               hmm.process
+              hmm.print_probabilities
 
               viterbi = Viterbi.new(record_buffer,hmm)
-              viterbi.robust(0.09) # adjustable variable
-              # why aren't these all the same method already?
-              # viterbi.run
-              # viterbi.find_path
-              # viterbi.print_path
+              viterbi.robust
+              # # why aren't these all the same method already?
+              viterbi.run
+              viterbi.find_path
+              viterbi.print_path
 
               pi = PatternInference.new
               viterbi.obs_seq.each do |obs|
@@ -68,6 +69,7 @@ module SPMidi
                 pi.find_pattern(el)
               end
 
+              ### uncomment for loop detection
               ## Uncomment for normal output (1/3)
               puts "inferrred pattern:"
 
@@ -101,6 +103,7 @@ module SPMidi
                 # end
 
                 record_buffer << note
+                note.print
                 hmm.add(note)
               end
             end
