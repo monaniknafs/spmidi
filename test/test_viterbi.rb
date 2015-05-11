@@ -81,7 +81,7 @@ module SPMidi
       puts "\n"
 
       viterbi = Viterbi.new(obs,hmm)
-      viterbi.robust(0.09)
+      viterbi.robust
 
       puts "robust observation sequence\n"
       obs = viterbi.obs_seq
